@@ -8,6 +8,8 @@ import com.wz.mobilemedia.bean.MediaInfoBean;
 
 import java.io.File;
 
+import static android.R.attr.type;
+
 /**
  * Created by wz on 17-5-18.
  * 获取音频基本信息工具类
@@ -16,8 +18,12 @@ import java.io.File;
 public class MediaInformationUtils {
 
 
-    public static MediaInfoBean getMediaInfomation(String path){
+    public  MediaInfoBean getMediaInfomation(String path){
+
+
+
         MediaInfoBean media = new MediaInfoBean();
+        media.setType(type);
         MediaMetadataRetriever mmr = new MediaMetadataRetriever();
         mmr.setDataSource(path);
         String title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE); // api level 10, 即从GB2.3.3开始有此功能

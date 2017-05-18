@@ -4,13 +4,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.wz.mobilemedia.R;
-import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.data.MediaInfoModel;
 import com.wz.mobilemedia.presenter.MediaPresenter;
 import com.wz.mobilemedia.presenter.contract.MediaInfoContract;
 import com.wz.mobilemedia.ui.adapter.MediaInfoAdapter;
-
-import java.util.List;
 
 import butterknife.BindView;
 
@@ -18,7 +15,7 @@ import butterknife.BindView;
  * Created by wz on 17-5-18.
  */
 
-public class BaseMediaInfoFragment extends ProgressFragment implements MediaInfoContract.View {
+public abstract class BaseMediaInfoFragment extends ProgressFragment implements MediaInfoContract.View {
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
     protected MediaInfoAdapter mAdapter;
@@ -31,12 +28,15 @@ public class BaseMediaInfoFragment extends ProgressFragment implements MediaInfo
     @Override
     protected void init() {
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
-        MediaPresenter mediaPresenter = new MediaPresenter(mediaInfoModel, this);
-        mediaPresenter.requestData(getActivity());
+       MediaPresenter mediaPresenter = new MediaPresenter(mediaInfoModel, this);
+        mediaPresenter.requestData(getActivity(),setMediaType());
         initRecyclerView();
 
         initListener();
     }
+
+
+    protected abstract int setMediaType();
 
     protected void initListener() {
 
@@ -45,21 +45,20 @@ public class BaseMediaInfoFragment extends ProgressFragment implements MediaInfo
 
     private void initRecyclerView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mAdapter = new MediaInfoAdapter(getActivity());
+       // mAdapter = new MediaInfoAdapter(getActivity());
+        mAdapter = initAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
     }
 
-
-    @Override
-    public void showError() {
-
-    }
+    protected abstract MediaInfoAdapter initAdapter();
 
 
-    @Override
+
+
+   /* @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
         mAdapter.setMediaInfoBeens(mediaInfoBeans);
-    }
+    }*/
 
 }

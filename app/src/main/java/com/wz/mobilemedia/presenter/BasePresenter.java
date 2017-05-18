@@ -31,4 +31,8 @@ public class BasePresenter<M,V extends BaseView> {
         }
     }
 
+    public  void requestData(Context context,int type){
+
+    }
+
 }

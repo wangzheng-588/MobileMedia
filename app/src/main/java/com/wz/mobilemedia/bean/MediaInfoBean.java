@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 
 public class MediaInfoBean implements Serializable {
+    private int mType;
     private String mTitle;
     private String mAlbum;
     private String mMime;
@@ -25,6 +26,14 @@ public class MediaInfoBean implements Serializable {
     private Bitmap mFrameAtTime;
 
     public MediaInfoBean() {
+    }
+
+    public int getType() {
+        return mType;
+    }
+
+    public void setType(int type) {
+        mType = type;
     }
 
     public Bitmap getFrameAtTime() {

@@ -16,4 +16,8 @@ public class MediaInfoModel {
         return ApiLocalServer.getLocalVideo(context);
     }
 
+    public Observable<List<String>> getLocalMusic(Context context){
+        return ApiLocalServer.getLocalMusic(context);
+    }
+
 }

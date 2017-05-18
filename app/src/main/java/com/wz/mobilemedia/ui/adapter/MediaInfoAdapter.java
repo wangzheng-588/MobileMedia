@@ -1,6 +1,7 @@
 package com.wz.mobilemedia.ui.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.Formatter;
 import android.view.LayoutInflater;
@@ -53,6 +54,9 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
         String duration = media.getDuration();
          duration = mTimeUtils.stringForTime(Integer.parseInt(duration));
         holder.mTvDuration.setText(duration);
+
+        Bitmap bitmap = media.getFrameAtTime();
+        holder.mIvIcon.setImageBitmap(bitmap);
 
         //格式化视频大小
         String fileSize = Formatter.formatFileSize(mContext, Long.valueOf(media.getSize()));

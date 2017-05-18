@@ -1,7 +1,6 @@
 package com.wz.mobilemedia.util;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.os.storage.StorageManager;
 import android.util.Log;
@@ -10,7 +9,6 @@ import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.bean.StorageInfo;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,42 +18,14 @@ import java.util.List;
  *
  * @author Administrator
  */
-public class StorageListUtil<T> {
-    private Activity mActivity;
-    private StorageManager mStorageManager;
-    private Method mMethodGetPaths;
-    private static ArrayList<String> sListPath = new ArrayList<>();
-    private static String[]  extensions = {".avi",".3gp",".wmv",".ts",".rmvb",".mov",".m4v",".m3u8",".3gpp",".3gpp2",
+public class StorageListUtil {
+
+    private ArrayList<String> mSListPath;
+
+    public static final   String[]  VIDEO_EXTENSIONS = {".avi",".mp4",".3gp",".wmv",".ts",".rmvb",".mov",".m4v",".m3u8",".3gpp",".3gpp2",
             ".mkv",".flv",".divx",".f4v",".rm",".asf",".ram",".mpg",".v8",".swf",".m2v",".asx",".ra",".ndivx",".xvid"};
+    public static final String[] MUSIC_EXTENSIONS = {".mp3"};
 
-
-    private StorageListUtil(Activity activity) {
-        mActivity = activity;
-        if (mActivity != null) {
-            mStorageManager = (StorageManager) mActivity
-                    .getSystemService(Activity.STORAGE_SERVICE);
-            try {
-                mMethodGetPaths = mStorageManager.getClass().getMethod(
-                        "getVolumePaths");
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private String[] getVolumePaths() {
-        String[] paths = null;
-        try {
-            paths = (String[]) mMethodGetPaths.invoke(mStorageManager);
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        }
-        return paths;
-    }
 
     @SuppressLint("NewApi")
     private static List<StorageInfo> listAvaliableStorage(Context context) {
@@ -113,12 +83,15 @@ public class StorageListUtil<T> {
     /**
      * 扫描音乐，从手机文件夹中递归扫描
      */
-    public static List<String> scannerMedia(Context context) {
+    public List<String> scannerMedia(Context context,String[]  extensions) {
+
+        mSListPath = new ArrayList<>();
+
         List<StorageInfo> list = StorageListUtil
                 .listAvaliableStorage(context);
         for (int i = 0; i < list.size(); i++) {
             StorageInfo storageInfo = list.get(i);
-            List<String> strings = scannerLocalMediaFile(storageInfo.path, true);
+            List<String> strings = scannerLocalMediaFile(storageInfo.path,extensions, true);
 
             return strings;
         }
@@ -131,8 +104,8 @@ public class StorageListUtil<T> {
      * @param Path        搜索目录
      * @param IsIterative 是否进入子文件夹
      */
-    public static List<String> scannerLocalMediaFile(String Path,
-                                                     boolean IsIterative) {
+    public List<String> scannerLocalMediaFile(String Path,String[]  extensions,boolean IsIterative) {
+
         File[] files = new File(Path).listFiles();
 
         if (files != null) {
@@ -150,7 +123,7 @@ public class StorageListUtil<T> {
                             if (displayName.endsWith(extensions[j])) {
                                 String path = f.getAbsolutePath();
 
-                                sListPath.add(path);
+                                mSListPath.add(path);
                             }
                         }
                     }
@@ -160,13 +133,13 @@ public class StorageListUtil<T> {
                         break;
                 } else if (f.isDirectory() && f.getPath().indexOf("/.") == -1) // 忽略点文件（隐藏文件/文件夹）
                 {
-                    scannerLocalMediaFile(f.getPath(), IsIterative);
+                    scannerLocalMediaFile(f.getPath(), extensions,IsIterative);
                 }
             }
 
-            return sListPath;
+            return mSListPath;
         }
-        return sListPath;
+        return mSListPath;
     }
 
 
