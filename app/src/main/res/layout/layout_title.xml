@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:background="#3097FD"
+              android:gravity="center"
+              android:orientation="horizontal">
+
+    <EditText
+        android:id="@+id/et_search"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/search_text_bg"
+        android:drawableLeft="@drawable/search_bg_selector"
+        android:hint="全网搜索"
+        android:textColorHint="@drawable/search_hint_text_color_selector"
+        android:textSize="15dp"/>
+
+    <ImageButton
+        android:id="@+id/ib_game"
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/vector_drawable_game"/>
+
+    <ImageButton
+        android:id="@+id/ib_history"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:background="@drawable/vector_drawable_history"/>
+
+</LinearLayout>

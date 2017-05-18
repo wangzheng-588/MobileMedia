@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MobileMedia</string>
+    <string name="loading">加载中</string>
+    <string name="empty_data">没有数据</string>
 </resources>

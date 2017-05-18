@@ -1,12 +1,14 @@
 package com.wz.mobilemedia.ui.activity;
 
-import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.ui.adapter.FragmentAdapter;
@@ -19,14 +21,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 import static com.wz.mobilemedia.R.id.rb_local_music;
 import static com.wz.mobilemedia.R.id.rb_local_video;
 import static com.wz.mobilemedia.R.id.rb_network_music;
 import static com.wz.mobilemedia.R.id.rb_network_video;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @BindView(R.id.view_pager)
     ViewPager mViewPager;
@@ -40,21 +41,18 @@ public class MainActivity extends AppCompatActivity {
     RadioButton mRbNetworkVideo;
     @BindView(R.id.rg_main)
     RadioGroup mRgMain;
+    @BindView(R.id.et_search)
+    EditText mEtSearch;
+    @BindView(R.id.ib_game)
+    ImageButton mIbGame;
+    @BindView(R.id.ib_history)
+    ImageButton mIbHistory;
     private List<Fragment> mFragments;
     private int mPosition;//当前viewpager选中位置
     private int checkID;//当前radiobutton选中位置
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
-
-        init();
-        initAdapter();
-    }
-
-    private void init() {
-
+    protected void init() {
         mRgMain.check(R.id.rb_local_video);
 
         initFragment();
@@ -64,10 +62,25 @@ public class MainActivity extends AppCompatActivity {
                 changeFragment(checkedId);
             }
         });
+
+        initAdapter();
+        initListener();
+    }
+
+    private void initListener() {
+        mEtSearch.setOnClickListener(this);
+        mIbGame.setOnClickListener(this);
+        mIbHistory.setOnClickListener(this);
+    }
+
+
+    @Override
+    protected int setLayoutResID() {
+        return R.layout.activity_main;
     }
 
     private void changeFragment(@IdRes int checkedId) {
-        switch (checkedId){
+        switch (checkedId) {
             case rb_local_video:
                 mPosition = 0;
                 break;
@@ -94,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initAdapter() {
-        FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager(),mFragments);
+        FragmentAdapter adapter = new FragmentAdapter(getSupportFragmentManager(), mFragments);
         mViewPager.setAdapter(adapter);
 
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -105,19 +118,19 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPageSelected(int position) {
-                switch (position){
+                switch (position) {
                     case 0:
-                        checkID= rb_local_video;
+                        checkID = rb_local_video;
                         break;
                     case 1:
-                        checkID= rb_local_music;
+                        checkID = rb_local_music;
                         break;
 
                     case 2:
-                        checkID= rb_network_music;
+                        checkID = rb_network_music;
                         break;
                     case 3:
-                        checkID= rb_network_video;
+                        checkID = rb_network_video;
                         break;
                 }
                 mRgMain.check(checkID);
@@ -129,5 +142,26 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
     }
+
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.et_search:
+                Toast.makeText(this, "search", Toast.LENGTH_SHORT).show();
+
+                break;
+
+            case R.id.ib_game:
+                Toast.makeText(this, "game", Toast.LENGTH_SHORT).show();
+                break;
+
+            case R.id.ib_history:
+                Toast.makeText(this, "history", Toast.LENGTH_SHORT).show();
+                break;
+        }
+    }
+
 }

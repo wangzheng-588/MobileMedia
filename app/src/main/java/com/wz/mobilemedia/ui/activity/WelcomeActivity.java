@@ -31,7 +31,7 @@ public class WelcomeActivity extends AppCompatActivity {
                         finish();
                     }
                 })
-                .duration(3000)
+                .duration(2000)
                 .interpolator(new AccelerateDecelerateInterpolator())
                 .start();
 
