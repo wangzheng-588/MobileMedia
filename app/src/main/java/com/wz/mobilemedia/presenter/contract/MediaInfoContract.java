@@ -13,6 +13,9 @@ public interface MediaInfoContract {
 
     interface View extends BaseView{
         void showResult(List<MediaInfoBean> mediaInfoBeans);
+        void showEmpty();
+        void showProgress();
+        void dismissProgress();
     }
 
 

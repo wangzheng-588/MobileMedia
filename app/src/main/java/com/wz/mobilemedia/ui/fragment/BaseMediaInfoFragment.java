@@ -2,7 +2,9 @@ package com.wz.mobilemedia.ui.fragment;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
@@ -67,5 +69,26 @@ public abstract class BaseMediaInfoFragment extends ProgressFragment implements 
         if (mediaInfoBeans!=null){
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
         }
+    }
+
+    @Override
+    public void showError() {
+        super.showError();
+        Toast.makeText(mContext, "数据加载错误，请重新加载", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showProgress() {
+        mViewProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissProgress() {
+        mViewProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showEmpty() {
+        mViewEmpty.setVisibility(View.VISIBLE);
     }
 }

@@ -2,6 +2,7 @@ package com.wz.mobilemedia.util;
 
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.media.ThumbnailUtils;
 import android.text.TextUtils;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
@@ -44,8 +45,21 @@ public class MediaInformationUtils {
         String date = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
         media.setDate(date);
 
-        Bitmap frameAtTime = mmr.getFrameAtTime(2000,MediaMetadataRetriever.OPTION_CLOSEST);
-        media.setFrameAtTime(frameAtTime);
+        //获取视频缩略图
+        long seconds = (Long.parseLong(duration) / 1000);
+        seconds = ((seconds / 2) + 2) * 1000 * 1000;
+        Bitmap frameAtTime = mmr.getFrameAtTime(seconds,MediaMetadataRetriever.OPTION_CLOSEST_SYNC);
+        if (frameAtTime!=null){
+            frameAtTime = ThumbnailUtils.extractThumbnail(frameAtTime,
+                    DisplayUtil.dp2px(100),
+                    DisplayUtil.dp2px(60),
+                    ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+            media.setFrameAtTime(frameAtTime);
+        }
+
+
+
+
         File file = new File(path);
         long length = file.length();
         media.setSize(length);

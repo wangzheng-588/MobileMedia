@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
+import com.wz.mobilemedia.common.Contract;
 import com.wz.mobilemedia.util.TimeUtils;
 
 import java.util.List;
@@ -50,12 +51,20 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
         MediaInfoBean media = mMediaInfoBeens.get(position);
+
+        if (media.getType()== Contract.MUSIC_TYPE){
+            holder.mTvName.setText(media.getAlbum());
+        } else {
+            holder.mTvName.setText(media.getTile());
+        }
+
         holder.mTvName.setText(media.getTile());
         String duration = media.getDuration();
          duration = mTimeUtils.stringForTime(Integer.parseInt(duration));
         holder.mTvDuration.setText(duration);
 
         Bitmap bitmap = media.getFrameAtTime();
+        holder.mIvIcon.setScaleType(ImageView.ScaleType.CENTER);
         holder.mIvIcon.setImageBitmap(bitmap);
 
         //格式化视频大小

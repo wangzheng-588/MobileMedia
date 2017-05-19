@@ -1,15 +1,14 @@
 package com.wz.mobilemedia.ui.fragment;
 
-import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
-import com.wz.mobilemedia.ui.activity.PlayMusicActivity;
 import com.wz.mobilemedia.ui.adapter.MediaInfoAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,6 +18,12 @@ import java.util.List;
 public class LocalMusicFragment extends BaseMediaInfoFragment {
 
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        allBindService();
+    }
 
     @Override
     protected void initView() {
@@ -28,19 +33,20 @@ public class LocalMusicFragment extends BaseMediaInfoFragment {
 
 
     @Override
-    public void showError() {
-        Toast.makeText(mContext, "没有数据", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
     protected void initListener() {
         mAdapter.setOnRecyclerViewItemListener(new MediaInfoAdapter.OnRecyclerViewItemListener() {
             @Override
             public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
-                Intent intent = new Intent(getActivity(), PlayMusicActivity.class);
-                intent.putExtra("position",position);
-                intent.putExtra("musicList",(ArrayList)mediaInfoBeens);
-                startActivity(intent);
+                //Intent intent = new Intent(getActivity(), PlayMusicActivity.class);
+
+               // allBindService();
+
+                Log.e("TAG", "itemClickListener: "+mMusicService.toString() );
+              mMusicService.startPlayMusic(mediaInfoBeens.get(position));
+                //intent.putExtra("position",position);
+                //intent.putExtra("musicList",(ArrayList)mediaInfoBeens);
+
+               // startActivity(intent);
             }
         });
     }

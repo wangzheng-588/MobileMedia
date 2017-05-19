@@ -26,13 +26,13 @@ public class VitamioPlayActivity extends AppCompatActivity implements MediaPlaye
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //定义全屏参数
+
         int flag = WindowManager.LayoutParams.FLAG_FULLSCREEN;
-        //获得当前窗体对象
+
         Window window = VitamioPlayActivity.this.getWindow();
-        //设置当前窗体为全屏显示
+
         window.setFlags(flag, flag);
-        //必须写这个，初始化加载库文件
+
         Vitamio.isInitialized(this);
         setContentView(R.layout.activity_vitamio_play);
         initView();

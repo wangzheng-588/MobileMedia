@@ -1,9 +1,14 @@
 package com.wz.mobilemedia.ui.fragment;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +17,7 @@ import android.widget.TextView;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.ui.BaseView;
+import com.wz.mobilemedia.ui.services.MusicService;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -23,15 +29,31 @@ import butterknife.Unbinder;
 public abstract class ProgressFragment extends Fragment implements BaseView {
 
     private View mRootView;
-    private View mViewProgress;
-    private View mViewEmpty;
-    private TextView mTextError;
+    protected View mViewProgress;
+    protected View mViewEmpty;
+    protected TextView mTextError;
     private FrameLayout mViewContent;
     private boolean isFragmentVisible;
     private boolean isReuseView;
     protected boolean isFirstVisible;
     private Unbinder mBind;
     protected Context mContext;
+    protected MusicService mMusicService;
+
+    public ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e("TAG","onserconn");
+            mMusicService = ((MusicService.MusicBind) service).getMusicService();
+            Log.e("TAG", "onServiceConnected: "+mMusicService.toString());
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+    };
+
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -64,6 +86,8 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mContext = getActivity();
         initVariable();
     }
 
@@ -127,5 +151,26 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
             mBind.unbind();
         }
         initVariable();
+    }
+
+    public void allBindService(){
+        Intent intent = new Intent(mContext,MusicService.class);
+        mContext.startService(intent);
+        mContext.bindService(intent,mConnection,Context.BIND_AUTO_CREATE);
+    }
+
+    public void allUnBindService(){
+        if (mConnection!=null){
+            mContext.unbindService(mConnection);
+            mConnection = null;
+        }
+    }
+
+
+
+
+    @Override
+    public void showError() {
+        mViewEmpty.setVisibility(View.VISIBLE);
     }
 }
