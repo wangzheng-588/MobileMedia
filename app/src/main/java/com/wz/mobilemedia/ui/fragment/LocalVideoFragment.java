@@ -2,6 +2,7 @@ package com.wz.mobilemedia.ui.fragment;
 
 import android.content.Intent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
@@ -19,13 +20,11 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
 
     @Override
     protected void initView() {
+        super.initView();
         mRlTemplateBottom.setVisibility(View.GONE);
+
     }
 
-    @Override
-    protected int setMediaType() {
-        return Contract.VIDEO_TYPE;
-    }
 
     @Override
     protected void initListener() {
@@ -39,20 +38,17 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
         });
     }
 
-    @Override
-    protected MediaInfoAdapter initAdapter() {
-        return new MediaInfoAdapter(getActivity());
-    }
-
 
     @Override
-    public void showResult(List<MediaInfoBean> mediaInfoBeans) {
-
-        mAdapter.setMediaInfoBeens(mediaInfoBeans);
+    protected void init() {
+        super.init();
+        mMediaPresenter.requestData(mContext, Contract.VIDEO_TYPE);
     }
+
 
     @Override
     public void showError() {
-
+        Toast.makeText(mContext, "没有数据", Toast.LENGTH_SHORT).show();
     }
+
 }

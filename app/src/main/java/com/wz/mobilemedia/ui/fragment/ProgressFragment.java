@@ -1,5 +1,6 @@
 package com.wz.mobilemedia.ui.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -19,14 +20,52 @@ import butterknife.Unbinder;
  * Created by wz on 17-5-18.
  */
 
-public abstract class ProgressFragment extends Fragment implements BaseView{
+public abstract class ProgressFragment extends Fragment implements BaseView {
 
     private View mRootView;
     private View mViewProgress;
     private View mViewEmpty;
     private TextView mTextError;
     private FrameLayout mViewContent;
+    private boolean isFragmentVisible;
+    private boolean isReuseView;
+    protected boolean isFirstVisible;
     private Unbinder mBind;
+    protected Context mContext;
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+
+        if (isFirstVisible && isVisibleToUser) {
+            onFragmentFirstVisible();
+            isFirstVisible = false;
+        }
+
+        if (isVisibleToUser) {
+            onFragmentVisibleChange(true);
+            isFragmentVisible = true;
+            return;
+        }
+        if (isFragmentVisible) {
+            isFragmentVisible = false;
+            onFragmentVisibleChange(false);
+        }
+    }
+
+    protected void onFragmentVisibleChange(boolean isVisible) {
+
+    }
+
+    protected void onFragmentFirstVisible() {
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initVariable();
+    }
 
     @Nullable
     @Override
@@ -36,19 +75,23 @@ public abstract class ProgressFragment extends Fragment implements BaseView{
         mViewProgress = mRootView.findViewById(R.id.view_progress);
         mViewEmpty = mRootView.findViewById(R.id.view_empty);
         mTextError = (TextView) mRootView.findViewById(R.id.text_tip);
+
+        mContext = getActivity();
+
         return mRootView;
 
     }
 
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         setRealContentView();
+        initView();
         init();
     }
 
-
+    protected abstract void initView();
 
 
     private void setRealContentView() {
@@ -60,13 +103,29 @@ public abstract class ProgressFragment extends Fragment implements BaseView{
 
     protected abstract void init();
 
+
+    protected void reuseView(boolean isReuse) {
+        isReuseView = isReuse;
+    }
+
+    protected boolean isFragmentVisible() {
+        return isFragmentVisible;
+    }
+
+
+    private void initVariable() {
+        isFirstVisible = true;
+        isFragmentVisible = false;
+        isReuseView = true;
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (mBind!=mBind.EMPTY){
+        if (mBind != mBind.EMPTY) {
             mBind.unbind();
         }
-
+        initVariable();
     }
 }

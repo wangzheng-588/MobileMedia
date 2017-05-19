@@ -16,15 +16,71 @@ import butterknife.Unbinder;
 
 public abstract class BaseFragment extends Fragment {
 
-    protected  View mRootView;
+    private boolean isFragmentVisible;
+    private boolean isReuseView;
+    private boolean isFirstVisible;
+    private View rootView;
     private Unbinder mBind;
+
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (rootView == null) {
+            return;
+        }
+        if (isFirstVisible && isVisibleToUser) {
+            onFragmentFirstVisible();
+            isFirstVisible = false;
+        }
+        if (isVisibleToUser) {
+            onFragmentVisibleChange(true);
+            isFragmentVisible = true;
+            return;
+        }
+        if (isFragmentVisible) {
+            isFragmentVisible = false;
+            onFragmentVisibleChange(false);
+        }
+    }
+
+    protected  void onFragmentVisibleChange(boolean isVisible){
+
+    }
+
+    protected  void onFragmentFirstVisible(){
+
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initVariable();
+    }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRootView = inflater.inflate(setLayoutRes(),container,false);
-        mBind = ButterKnife.bind(this, mRootView);
-        return mRootView;
+        View view = inflater.inflate(setLayoutRes(),container,false);
+        mBind = ButterKnife.bind(this, view);
+        return view;
+    }
+
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        if (rootView == null) {
+            rootView = view;
+            if (getUserVisibleHint()) {
+                if (isFirstVisible) {
+                    onFragmentFirstVisible();
+                    isFirstVisible = false;
+                }
+                onFragmentVisibleChange(true);
+                isFragmentVisible = true;
+            }
+        }
+        super.onViewCreated(isReuseView ? rootView : view, savedInstanceState);
     }
 
     protected abstract int setLayoutRes();
@@ -41,11 +97,28 @@ public abstract class BaseFragment extends Fragment {
 
     }
 
+    protected void reuseView(boolean isReuse) {
+        isReuseView = isReuse;
+    }
+
+    protected boolean isFragmentVisible() {
+        return isFragmentVisible;
+    }
+
+
+    private void initVariable() {
+        isFirstVisible = true;
+        isFragmentVisible = false;
+        rootView = null;
+        isReuseView = true;
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         if (mBind!=mBind.EMPTY){
             mBind.unbind();
         }
+        initVariable();
     }
 }

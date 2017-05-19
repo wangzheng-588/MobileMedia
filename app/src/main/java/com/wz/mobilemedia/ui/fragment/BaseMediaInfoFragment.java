@@ -5,10 +5,13 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.FrameLayout;
 
 import com.wz.mobilemedia.R;
+import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.data.MediaInfoModel;
 import com.wz.mobilemedia.presenter.MediaPresenter;
 import com.wz.mobilemedia.presenter.contract.MediaInfoContract;
 import com.wz.mobilemedia.ui.adapter.MediaInfoAdapter;
+
+import java.util.List;
 
 import butterknife.BindView;
 
@@ -23,6 +26,7 @@ public abstract class BaseMediaInfoFragment extends ProgressFragment implements 
     FrameLayout mRlTemplateBottom;
 
     protected MediaInfoAdapter mAdapter;
+    protected MediaPresenter mMediaPresenter;
 
 
     @Override
@@ -33,42 +37,35 @@ public abstract class BaseMediaInfoFragment extends ProgressFragment implements 
     @Override
     protected void init() {
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
-        MediaPresenter mediaPresenter = new MediaPresenter(mediaInfoModel, this);
-        mediaPresenter.requestData(getActivity(), setMediaType());
-        initView();
-        initRecyclerView();
-
-        initListener();
+        mMediaPresenter = new MediaPresenter(mediaInfoModel, this);
     }
 
-    protected void initView(){
-
-    }
-
-
-    protected abstract int setMediaType();
 
     protected void initListener() {
 
     }
 
 
-    private void initRecyclerView() {
+
+
+
+    @Override
+    protected void initView() {
+        initRecyclerView();
+        initListener();
+    }
+
+    protected  void initRecyclerView(){
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        // mAdapter = new MediaInfoAdapter(getActivity());
-        mAdapter = initAdapter();
+        mAdapter = new MediaInfoAdapter(mContext);
         mRecyclerView.setAdapter(mAdapter);
 
     }
 
-    protected abstract MediaInfoAdapter initAdapter();
-
-
-
-
-   /* @Override
+    @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
-        mAdapter.setMediaInfoBeens(mediaInfoBeans);
-    }*/
-
+        if (mediaInfoBeans!=null){
+            mAdapter.setMediaInfoBeens(mediaInfoBeans);
+        }
+    }
 }
