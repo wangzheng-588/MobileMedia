@@ -1,6 +1,7 @@
 package com.wz.mobilemedia.ui.fragment;
 
 import android.content.Intent;
+import android.view.View;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
@@ -17,6 +18,11 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
 
 
     @Override
+    protected void initView() {
+        mRlTemplateBottom.setVisibility(View.GONE);
+    }
+
+    @Override
     protected int setMediaType() {
         return Contract.VIDEO_TYPE;
     }
@@ -25,9 +31,9 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
     protected void initListener() {
         mAdapter.setOnRecyclerViewItemListener(new MediaInfoAdapter.OnRecyclerViewItemListener() {
             @Override
-            public void itemClickListener(MediaInfoBean mediaInfoBean) {
+            public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
                 Intent intent = new Intent(getActivity(), VitamioPlayActivity.class);
-                intent.putExtra("mediaPath",mediaInfoBean.getPath());
+                intent.putExtra("mediaPath",mediaInfoBeens.get(position).getPath());
                 startActivity(intent);
             }
         });

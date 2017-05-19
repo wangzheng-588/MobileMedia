@@ -21,6 +21,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".ui.activity.WelcomeActivity"/>
         <activity android:name=".ui.activity.PlayVideoActivity">
         </activity>
         <activity
@@ -31,6 +32,10 @@
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity android:name=".ui.activity.VitamioPlayActivity">
         </activity>
+        <activity android:name=".ui.activity.PlayMusicActivity">
+        </activity>
+
+        <service android:name=".ui.services.PlayMusicService"/>
     </application>
 
 </manifest>

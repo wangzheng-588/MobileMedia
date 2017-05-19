@@ -139,4 +139,50 @@ public class MediaInfoBean implements Serializable {
     public void setTile(String tile) {
         mTile = tile;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MediaInfoBean that = (MediaInfoBean) o;
+
+        if (mType != that.mType) return false;
+        if (mSize != that.mSize) return false;
+        if (mTitle != null ? !mTitle.equals(that.mTitle) : that.mTitle != null) return false;
+        if (mAlbum != null ? !mAlbum.equals(that.mAlbum) : that.mAlbum != null) return false;
+        if (mMime != null ? !mMime.equals(that.mMime) : that.mMime != null) return false;
+        if (mArtist != null ? !mArtist.equals(that.mArtist) : that.mArtist != null) return false;
+        if (mDuration != null ? !mDuration.equals(that.mDuration) : that.mDuration != null)
+            return false;
+        if (mBitrate != null ? !mBitrate.equals(that.mBitrate) : that.mBitrate != null)
+            return false;
+        if (mDate != null ? !mDate.equals(that.mDate) : that.mDate != null) return false;
+        if (mDisplayName != null ? !mDisplayName.equals(that.mDisplayName) : that.mDisplayName != null)
+            return false;
+        if (mPath != null ? !mPath.equals(that.mPath) : that.mPath != null) return false;
+        if (mIcon != null ? !mIcon.equals(that.mIcon) : that.mIcon != null) return false;
+        if (mTile != null ? !mTile.equals(that.mTile) : that.mTile != null) return false;
+        return mFrameAtTime != null ? mFrameAtTime.equals(that.mFrameAtTime) : that.mFrameAtTime == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = mType;
+        result = 31 * result + (mTitle != null ? mTitle.hashCode() : 0);
+        result = 31 * result + (mAlbum != null ? mAlbum.hashCode() : 0);
+        result = 31 * result + (mMime != null ? mMime.hashCode() : 0);
+        result = 31 * result + (mArtist != null ? mArtist.hashCode() : 0);
+        result = 31 * result + (mDuration != null ? mDuration.hashCode() : 0);
+        result = 31 * result + (mBitrate != null ? mBitrate.hashCode() : 0);
+        result = 31 * result + (mDate != null ? mDate.hashCode() : 0);
+        result = 31 * result + (mDisplayName != null ? mDisplayName.hashCode() : 0);
+        result = 31 * result + (mPath != null ? mPath.hashCode() : 0);
+        result = 31 * result + (mIcon != null ? mIcon.hashCode() : 0);
+        result = 31 * result + (int) (mSize ^ (mSize >>> 32));
+        result = 31 * result + (mTile != null ? mTile.hashCode() : 0);
+        result = 31 * result + (mFrameAtTime != null ? mFrameAtTime.hashCode() : 0);
+        return result;
+    }
 }

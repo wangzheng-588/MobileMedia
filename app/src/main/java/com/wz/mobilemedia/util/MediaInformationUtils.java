@@ -44,7 +44,7 @@ public class MediaInformationUtils {
         String date = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DATE);
         media.setDate(date);
 
-        Bitmap frameAtTime = mmr.getFrameAtTime(10, MediaMetadataRetriever.OPTION_CLOSEST);
+        Bitmap frameAtTime = mmr.getFrameAtTime(2000,MediaMetadataRetriever.OPTION_CLOSEST);
         media.setFrameAtTime(frameAtTime);
         File file = new File(path);
         long length = file.length();

@@ -2,6 +2,7 @@ package com.wz.mobilemedia.ui.fragment;
 
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.FrameLayout;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.data.MediaInfoModel;
@@ -18,7 +19,11 @@ import butterknife.BindView;
 public abstract class BaseMediaInfoFragment extends ProgressFragment implements MediaInfoContract.View {
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
+    @BindView(R.id.rl_template_bottom)
+    FrameLayout mRlTemplateBottom;
+
     protected MediaInfoAdapter mAdapter;
+
 
     @Override
     protected int setLayout() {
@@ -28,11 +33,16 @@ public abstract class BaseMediaInfoFragment extends ProgressFragment implements 
     @Override
     protected void init() {
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
-       MediaPresenter mediaPresenter = new MediaPresenter(mediaInfoModel, this);
-        mediaPresenter.requestData(getActivity(),setMediaType());
+        MediaPresenter mediaPresenter = new MediaPresenter(mediaInfoModel, this);
+        mediaPresenter.requestData(getActivity(), setMediaType());
+        initView();
         initRecyclerView();
 
         initListener();
+    }
+
+    protected void initView(){
+
     }
 
 
@@ -45,7 +55,7 @@ public abstract class BaseMediaInfoFragment extends ProgressFragment implements 
 
     private void initRecyclerView() {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-       // mAdapter = new MediaInfoAdapter(getActivity());
+        // mAdapter = new MediaInfoAdapter(getActivity());
         mAdapter = initAdapter();
         mRecyclerView.setAdapter(mAdapter);
 

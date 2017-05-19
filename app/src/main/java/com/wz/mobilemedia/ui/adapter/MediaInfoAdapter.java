@@ -66,7 +66,7 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mListener.itemClickListener(mMediaInfoBeens.get(position));
+                    mListener.itemClickListener(position,mMediaInfoBeens);
                 }
             });
         }
@@ -100,6 +100,6 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
     }
 
     public interface OnRecyclerViewItemListener{
-        void itemClickListener(MediaInfoBean mediaInfoBean);
+        void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens);
     }
 }

@@ -24,7 +24,7 @@ public class ApiLocalServer {
             @Override
             public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
                 StorageListUtil storageListUtil = new StorageListUtil();
-                List<String> pathString =storageListUtil.scannerMedia(context, StorageListUtil.VIDEO_EXTENSIONS);
+                List<String> pathString = storageListUtil.scannerMedia(context, StorageListUtil.VIDEO_EXTENSIONS);
                 e.onNext(pathString);
                 e.onComplete();
             }
@@ -34,20 +34,20 @@ public class ApiLocalServer {
     }
 
 
-    public static Observable<List<String>> getLocalMusic(final Context context){
+    public static Observable<List<String>> getLocalMusic(final Context context) {
 
 
         return Observable.create(new ObservableOnSubscribe<List<String>>() {
             @Override
             public void subscribe(ObservableEmitter<List<String>> e) throws Exception {
                 StorageListUtil storageListUtil = new StorageListUtil();
-                List<String> pathString = storageListUtil.scannerMedia(context,StorageListUtil.MUSIC_EXTENSIONS);
+                List<String> pathString = storageListUtil.scannerMedia(context, StorageListUtil.MUSIC_EXTENSIONS);
                 e.onNext(pathString);
                 e.onComplete();
             }
         }).subscribeOn(Schedulers.io());
 
 
-}
+    }
 
 }

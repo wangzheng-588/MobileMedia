@@ -34,8 +34,8 @@ dependencies {
     //banner
     //glide
     //rxbinding
-    compile 'com.eftimoff:android-pathview:1.0.8@aar'
     compile project(':vitamio')
+    compile 'com.eftimoff:android-pathview:1.0.8@aar'
     compile 'com.eftimoff:android-pathview:1.0.8@aar'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
