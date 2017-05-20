@@ -13,10 +13,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.wz.mobilemedia.R;
@@ -26,7 +26,11 @@ import butterknife.BindView;
 
 import static android.view.View.GONE;
 
-public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener {
+public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener, MediaPlayer.OnCompletionListener {
+
+    public static final int AUTO_HIDE_MENU = 1;
+    public static final int CURRENT_POSITION = 2;
+    private static final int CHANGE_VOLUME = 3;
 
     @BindView(R.id.top_back)
     ImageButton mTopBack;
@@ -58,8 +62,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private String mMediaPath;
 
 
-    public static final int AUTO_HIDE_MENU = 1;
-    public static final int CURRENT_POSITION = 2;
 
     private Context mContext;
     private boolean isShowControllerMenu;//是否显示控制菜单
@@ -110,19 +112,17 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private void initListener() {
         mPlayPause.setOnClickListener(this);
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
+
     }
 
 
     private void initPlay(final String mediaPath) {
         if (mediaPath != null) {
-            MediaController controller = new MediaController(this);
             mVideoView.setVideoPath(mediaPath);
-            mVideoView.setMediaController(controller);
-
 
             mVideoView.start();
-
             mVideoView.setOnErrorListener(this);
+          mVideoView.setOnCompletionListener(this);
 
             mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
@@ -164,6 +164,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
      */
     public void showMenu() {
         mControllerMenu.setVisibility(View.VISIBLE);
+        mPlayPause.setVisibility(View.VISIBLE);
 
         mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
         isShowControllerMenu = true;
@@ -187,7 +188,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mHandler.removeMessages(AUTO_HIDE_MENU);
                 Log.e("TAG", "onTouchEvent: "+"down" );
 
-                //showMenu();
 
                 break;
 
@@ -249,6 +249,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
             mVideoView.seekTo((int) max);
 
+            mHandler.sendEmptyMessage(CHANGE_VOLUME);
         }
 
     }
@@ -281,14 +282,13 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public void onClick(View v) {
         switch (v.getId()){
+            //播放暂停点击事件
             case R.id.play_pause:
                 if (!isPlay){
-                    mHandler.removeMessages(AUTO_HIDE_MENU);
                     mVideoView.pause();
                     mPlayPause.setImageResource(R.drawable.ic_player_play);
                     isPlay = true;
                 } else {
-                    mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
                     mVideoView.start();
                     mPlayPause.setImageResource(R.drawable.ic_player_pause);
                     isPlay = false;
@@ -334,4 +334,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     }
 
 
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        finish();
+        Toast.makeText(mContext, "播放完成", Toast.LENGTH_SHORT).show();
+    }
 }
