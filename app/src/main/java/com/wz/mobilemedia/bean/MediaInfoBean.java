@@ -23,7 +23,7 @@ public class MediaInfoBean implements Serializable {
     private ImageView mIcon;
     private long mSize;
     private String mTile;
-    private Bitmap mFrameAtTime;
+    private transient Bitmap mFrameAtTime;
 
     public MediaInfoBean() {
     }

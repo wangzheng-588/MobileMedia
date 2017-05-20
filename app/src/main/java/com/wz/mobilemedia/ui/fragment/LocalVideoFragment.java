@@ -1,6 +1,7 @@
 package com.wz.mobilemedia.ui.fragment;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.View;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
@@ -8,6 +9,7 @@ import com.wz.mobilemedia.common.Contract;
 import com.wz.mobilemedia.ui.activity.PlayVideoActivity;
 import com.wz.mobilemedia.ui.adapter.MediaInfoAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,7 +33,12 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
             @Override
             public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
                 Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra("mediaPath",mediaInfoBeens.get(position).getPath());
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("videoList",(ArrayList<MediaInfoBean>)mediaInfoBeens);
+                bundle.putInt("position",position);
+                intent.putExtras(bundle);
+                //intent.putExtra("mediaPath",mediaInfoBeens.get(position).getPath());
                 startActivity(intent);
             }
         });

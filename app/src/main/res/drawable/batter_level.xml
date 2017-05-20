@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@drawable/vector_drawable_battery_level0"
+        android:maxLevel="10">
+
+    </item>
+
+    <item
+        android:drawable="@drawable/vector_drawable_battery_level1"
+        android:maxLevel="20">
+
+
+    </item>
+
+    <item
+        android:drawable="@drawable/vector_drawable_battery_level2"
+        android:maxLevel="50">
+
+
+    </item>
+
+    <item
+        android:drawable="@drawable/vector_drawable_battery_level3"
+        android:maxLevel="80">
+
+
+    </item>
+
+    <item
+        android:drawable="@drawable/vector_drawable_battery_level4"
+        android:maxLevel="100">
+
+    </item>
+
+
+</level-list>

@@ -25,6 +25,8 @@
         </activity>
         <activity android:name=".ui.activity.WelcomeActivity"/>
         <activity android:name=".ui.activity.PlayVideoActivity"
+                  android:theme="@style/full_screen"
+                  android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation">
         </activity>
         <activity
@@ -39,6 +41,8 @@
         </activity>
 
         <service android:name=".ui.services.MusicService"/>
+
+        <receiver android:name=".ui.activity.PlayVideoActivity$BatteryReceiver"/>
     </application>
 
 </manifest>

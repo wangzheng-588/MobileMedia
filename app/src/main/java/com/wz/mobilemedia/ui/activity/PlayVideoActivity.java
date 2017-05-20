@@ -1,14 +1,18 @@
 package com.wz.mobilemedia.ui.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -20,13 +24,17 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.wz.mobilemedia.R;
+import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.util.TimeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 
 import static android.view.View.GONE;
 
-public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener, MediaPlayer.OnCompletionListener, View.OnTouchListener {
+public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener, MediaPlayer.OnCompletionListener {
 
     public static final int AUTO_HIDE_MENU = 1;
     public static final int CURRENT_POSITION = 2;
@@ -58,9 +66,16 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     VideoView mVideoView;
     @BindView(R.id.menu_controller)
     View mControllerMenu;
+    @BindView(R.id.ib_battery)
+    ImageButton mIbBattery;
+    @BindView(R.id.ib_fullscrrent)
+    ImageButton mIbFullscrrent;
+    @BindView(R.id.ib_video_next)
+    ImageButton mIbVideoNext;
+    @BindView(R.id.ib_video_pre)
+    ImageButton mIbVideoPre;
 
     private String mMediaPath;
-
 
 
     private Context mContext;
@@ -72,25 +87,28 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            switch (msg.what){
+            switch (msg.what) {
                 case AUTO_HIDE_MENU:
                     hideMenu();
                     break;
 
                 case CURRENT_POSITION:
                     mHandler.removeMessages(CURRENT_POSITION);
-                    if (mVideoView!=null){
+                    if (mVideoView != null) {
 
-                        mTvTimeCurrent.setText(mTimeUtils.stringForTime( mVideoView.getCurrentPosition()));
+                        mTvTimeCurrent.setText(mTimeUtils.stringForTime(mVideoView.getCurrentPosition()));
                         mMediacontrollerSeekbar.setProgress(mVideoView.getCurrentPosition());
                     }
-                    mHandler.sendEmptyMessageDelayed(CURRENT_POSITION,1000);
+                    mHandler.sendEmptyMessageDelayed(CURRENT_POSITION, 1000);
                     break;
             }
         }
     };
     private TimeUtils mTimeUtils;
     private AudioManager mAudioManager;
+    private List<MediaInfoBean> mVideoPlays;
+    private int mPosition;
+    private GestureDetector mGestureDetector;
 
     @Override
     protected int setLayoutResID() {
@@ -99,42 +117,60 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     protected void init() {
+        //注册电池广播事件
+        BatteryReceiver batteryReceiver = new BatteryReceiver();
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        this.registerReceiver(batteryReceiver, ifilter);
+
+        //手势识别器
+        mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return super.onDoubleTapEvent(e);
+            }
+        });
         mTimeUtils = new TimeUtils();
-        mAudioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         hideMenu();
         initListener();
-        mMediaPath = getIntent().getStringExtra("mediaPath");
 
-        initPlay(mMediaPath);
+
+        mVideoPlays = (ArrayList<MediaInfoBean>) (getIntent().getSerializableExtra("videoList"));
+        mPosition = getIntent().getIntExtra("position", 0);
+        //mMediaPath = getIntent().getStringExtra("mediaPath");
+
+        initPlay(mPosition);
 
     }
 
     private void initListener() {
         mPlayPause.setOnClickListener(this);
-        mPlayPause.setOnTouchListener(this);
+        mIbVideoNext.setOnClickListener(this);
+        mIbVideoPre.setOnClickListener(this);
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
 
     }
 
 
-    private void initPlay(final String mediaPath) {
-        if (mediaPath != null) {
-            mVideoView.setVideoPath(mediaPath);
+    private void initPlay(final int position) {
+
+        if (mVideoPlays != null && mVideoPlays.size() > 0) {
+            mVideoView.setVideoPath(mVideoPlays.get(position).getPath());
 
             mVideoView.start();
             mVideoView.setOnErrorListener(this);
-          mVideoView.setOnCompletionListener(this);
+            mVideoView.setOnCompletionListener(this);
 
             mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     int duration = mp.getDuration();
+                    mTvFilename.setText(mVideoPlays.get(position).getTile());
                     mTvTimeTotal.setText(mTimeUtils.stringForTime(duration));
                     mMediacontrollerSeekbar.setMax(mp.getDuration());
                     mHandler.sendEmptyMessage(CURRENT_POSITION);
                 }
             });
-
 
         }
 
@@ -148,7 +184,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         finish();
         return true;
     }
-
 
 
     /**
@@ -172,7 +207,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     }
 
 
-
     private float startX;
     private float startY;
     private float endY;
@@ -181,13 +215,13 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         super.onTouchEvent(event);
-        switch (event.getAction()){
+        switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 startTime = System.currentTimeMillis();
                 startX = event.getX();
                 startY = event.getY();
                 mHandler.removeMessages(AUTO_HIDE_MENU);
-                Log.e("TAG", "onTouchEvent: "+"down" );
+                Log.e("TAG", "onTouchEvent: " + "down");
 
 
                 break;
@@ -201,11 +235,11 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 float disX = moveX - startX;
                 float disY = moveY - startY;
 
-                if (Math.abs(disX)>Math.abs(disY)){
+                if (Math.abs(disX) > Math.abs(disY)) {
 
-                        changePosition(-disX);
+                    changePosition(-disX);
 
-                } else if (Math.abs(disX)<Math.abs(disY)){
+                } else if (Math.abs(disX) < Math.abs(disY)) {
 
                     changeVolume(-disY);
 
@@ -216,19 +250,19 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             case MotionEvent.ACTION_UP:
                 long endTime = System.currentTimeMillis();
 
-                if (endTime - startTime<150){
+                if (endTime - startTime < 150) {
                     mHandler.removeMessages(AUTO_HIDE_MENU);
 
-                    if (isShowControllerMenu){
+                    if (isShowControllerMenu) {
                         hideMenu();
                     } else {
                         showMenu();
                     }
                 }
 
-                Log.e("TAG","up"+(endTime - startTime));
+                Log.e("TAG", "up" + (endTime - startTime));
 
-                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
+                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
                 break;
         }
         return true;
@@ -270,37 +304,90 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             int width = metric.widthPixels;     // 屏幕宽度（像素）
             int height = metric.heightPixels;
 
-
             float index = dis / height * maxVolume * 3;
-            float volume = Math.max(currentVolume+index,0);
-            Log.e("TAG", "changeVolume: "+volume );
+            float volume = Math.max(currentVolume + index, 0);
+            Log.e("TAG", "changeVolume: " + volume);
 
-            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) volume,0);
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) volume, 0);
         }
     }
 
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             //播放暂停点击事件
             case R.id.play_pause:
-                if (!isPlay){
-                    mVideoView.pause();
-                    mPlayPause.setImageResource(R.drawable.ic_player_play);
-                    isPlay = true;
-                } else {
-                    mVideoView.start();
-                    mPlayPause.setImageResource(R.drawable.ic_player_pause);
-                    isPlay = false;
-                }
+                setPlayButtonState();
                 break;
+
+            case R.id.ib_video_next:
+                Toast.makeText(this, "下一个视频", Toast.LENGTH_SHORT).show();
+                setNextVideo();
+                break;
+
+            case R.id.ib_video_pre:
+                Toast.makeText(this, "上一个视频", Toast.LENGTH_SHORT).show();
+                setPreVideo();
+                break;
+
+        }
+        mHandler.removeMessages(AUTO_HIDE_MENU);
+        mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
+    }
+
+    private void setNextVideo() {
+        mPosition++;
+        if (mPosition < mVideoPlays.size()) {
+            mVideoView.setVideoPath(mVideoPlays.get(mPosition).getPath());
+            mVideoView.start();
+
+            setButtonState();
+        }
+
+    }
+
+    private void setPreVideo() {
+        mPosition--;
+        if (mPosition >= 0) {
+            mVideoView.setVideoPath(mVideoPlays.get(mPosition).getPath());
+            mVideoView.start();
+            setButtonState();
+        }
+
+    }
+
+    private void setButtonState() {
+
+        mIbVideoPre.setEnabled(true);
+        mIbVideoNext.setEnabled(true);
+
+        if (mPosition == mVideoPlays.size() - 1) {
+            mIbVideoNext.setEnabled(false);
+            //mIbVideoNext.setBackgroundResource(R.drawable.vector_drawable_video_next_gray);
+        }
+
+        if (mPosition==0){
+            mIbVideoPre.setEnabled(false);
+           // mIbVideoPre.setBackgroundResource(R.drawable.vector_drawable_video_pre_gray);
+        }
+    }
+
+    private void setPlayButtonState() {
+        if (!isPlay) {
+            mVideoView.pause();
+            mPlayPause.setImageResource(R.drawable.ic_player_play);
+            isPlay = true;
+        } else {
+            mVideoView.start();
+            mPlayPause.setImageResource(R.drawable.ic_player_pause);
+            isPlay = false;
         }
     }
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (fromUser){
+        if (fromUser) {
             seekBar.setProgress(progress);
             mVideoView.seekTo(progress);
 
@@ -314,8 +401,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mHandler.sendEmptyMessageDelayed(CURRENT_POSITION,3000);
-        mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
+        mHandler.sendEmptyMessage(CURRENT_POSITION);
+        mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
     }
 
     @Override
@@ -326,8 +413,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     /**
      * 返回当前屏幕是否为竖屏。
+     *
      * @param context
-     * @return 当且仅当当前屏幕为竖屏时返回true,否则返回false。
+     * @return 当且仅当当前屏幕为竖屏时返回true, 否则返回false。
      */
     public static boolean isScreenOriatationPortrait(Context context) {
         return context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
@@ -336,23 +424,35 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+
+        Toast.makeText(this, "播放完成", Toast.LENGTH_SHORT).show();
         finish();
-        Toast.makeText(mContext, "播放完成", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
 
-        switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                mHandler.removeMessages(AUTO_HIDE_MENU);
-                break;
+    public class BatteryReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
 
-            case MotionEvent.ACTION_UP:
-                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
-                break;
+            changeBattery(level);
+
         }
-        return false;
+    }
+
+    private void changeBattery(int level) {
+        if (level <= 10) {
+            mIbBattery.getBackground().setLevel(10);
+        } else if (level <= 20) {
+            mIbBattery.getBackground().setLevel(20);
+        } else if (level <= 50) {
+            mIbBattery.getBackground().setLevel(50);
+        } else if (level <= 80) {
+            mIbBattery.getBackground().setLevel(80);
+        } else if (level <= 100) {
+            mIbBattery.getBackground().setLevel(level);
+        }
+
     }
 
 }
