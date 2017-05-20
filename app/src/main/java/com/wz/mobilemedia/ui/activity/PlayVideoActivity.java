@@ -26,7 +26,7 @@ import butterknife.BindView;
 
 import static android.view.View.GONE;
 
-public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener, MediaPlayer.OnCompletionListener {
+public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErrorListener, SeekBar.OnSeekBarChangeListener, View.OnClickListener, MediaPlayer.OnCompletionListener, View.OnTouchListener {
 
     public static final int AUTO_HIDE_MENU = 1;
     public static final int CURRENT_POSITION = 2;
@@ -111,6 +111,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     private void initListener() {
         mPlayPause.setOnClickListener(this);
+        mPlayPause.setOnTouchListener(this);
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
 
     }
@@ -179,7 +180,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
+        super.onTouchEvent(event);
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 startTime = System.currentTimeMillis();
@@ -217,6 +218,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                 if (endTime - startTime<150){
                     mHandler.removeMessages(AUTO_HIDE_MENU);
+
                     if (isShowControllerMenu){
                         hideMenu();
                     } else {
@@ -231,6 +233,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         }
         return true;
     }
+
 
     private void changePosition(float disX) {
         int duration = mVideoView.getDuration();
@@ -274,8 +277,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
             mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) volume,0);
         }
-
-
     }
 
 
@@ -300,7 +301,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser){
-
             seekBar.setProgress(progress);
             mVideoView.seekTo(progress);
 
@@ -339,4 +339,20 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         finish();
         Toast.makeText(mContext, "播放完成", Toast.LENGTH_SHORT).show();
     }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                mHandler.removeMessages(AUTO_HIDE_MENU);
+                break;
+
+            case MotionEvent.ACTION_UP:
+                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
+                break;
+        }
+        return false;
+    }
+
 }
