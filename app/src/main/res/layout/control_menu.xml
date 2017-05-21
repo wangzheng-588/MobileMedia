@@ -70,31 +70,50 @@
 
         <RelativeLayout
             android:id="@+id/operation_volume_brightness"
-            android:layout_width="150dp"
-            android:layout_height="75dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:background="@drawable/videobg"
             android:orientation="horizontal"
             android:padding="0dip"
             android:visibility="gone">
 
-            <ImageView
-                android:id="@+id/operation_bg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <RelativeLayout
+                android:orientation="vertical"
                 android:layout_centerInParent="true"
-                android:src="@drawable/video_volumn_bg"/>
+                android:layout_width="wrap_content"
+                android:layout_height="100dp">
+                <ImageView
+                    android:layout_marginLeft="-15dp"
+                    android:id="@+id/operation_bg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/volume_level"/>
+                <TextView
+                    android:gravity="center"
+                    android:layout_marginTop="-15dp"
+                    android:layout_below="@id/operation_bg"
+                    android:id="@+id/tv_volume"
+                    android:layout_marginRight="-5dp"
+                    android:layout_centerVertical="true"
+                    android:textColor="#ffffff"
+                    android:textSize="15sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </RelativeLayout>
+
+
 
             <TextView
+                android:layout_marginTop="15dp"
                 android:id="@+id/operation_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/operation_bg"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="true"
                 android:text="32:22/45:00"
                 android:textColor="#ffffff"
-                android:textSize="10sp"
+                android:textSize="25sp"
                 android:visibility="gone"
                 />
         </RelativeLayout>

@@ -74,6 +74,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     ImageButton mIbVideoNext;
     @BindView(R.id.ib_video_pre)
     ImageButton mIbVideoPre;
+    @BindView(R.id.tv_volume)
+    TextView mTvVolume;
 
     private String mMediaPath;
 
@@ -109,6 +111,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private List<MediaInfoBean> mVideoPlays;
     private int mPosition;
     private GestureDetector mGestureDetector;
+    private int mMaxVolume;
+    private int mLevel;
+
 
     @Override
     protected int setLayoutResID() {
@@ -130,7 +135,13 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             }
         });
         mTimeUtils = new TimeUtils();
+
+        //获取音频管理器
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        //获取最大音量和当前音量
+        mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
+
         hideMenu();
         initListener();
 
@@ -242,7 +253,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 } else if (Math.abs(disX) < Math.abs(disY)) {
 
                     changeVolume(-disY);
-
                 }
 
                 break;
@@ -292,23 +302,55 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     }
 
     private void changeVolume(float dis) {
-
-        mOperationBg.setVisibility(View.VISIBLE);
+        mOperationVolumeBrightness.setVisibility(View.VISIBLE);
         mPlayPause.setVisibility(GONE);
-        int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int currentVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        if (!isScreenOriatationPortrait(this)) {
 
+        if (!isScreenOriatationPortrait(this)) {
+            int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            // Log.e("TAG",currentVolume+"mCurrentVolume");
             DisplayMetrics metric = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(metric);
             int width = metric.widthPixels;     // 屏幕宽度（像素）
             int height = metric.heightPixels;
 
-            float index = dis / height * maxVolume * 3;
-            float volume = Math.max(currentVolume + index, 0);
-            Log.e("TAG", "changeVolume: " + volume);
 
-            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, (int) volume, 0);
+            float index = (dis / height * mMaxVolume * 3) / 100;
+            //Log.e("TAG", "index: "+index);
+            //float volume = Math.max(Math.max(mCurrentVolume + index, 0),mMaxVolume);
+            int volume = (int) (mMaxVolume * index) + currentVolume;
+            //  Log.e("TAG", "changeVolume: " + index);
+            int changeVolume = (volume > mMaxVolume ? mMaxVolume : volume) < 0 ? 0 : (volume > mMaxVolume ? mMaxVolume : volume);
+            if (changeVolume == 0) {
+                mLevel = 0;
+            } else {
+                mLevel = currentVolume * 100 / mMaxVolume;
+            }
+
+            changeVolumeImage(mLevel);
+            mTvVolume.setText(mLevel + "");
+
+            Log.e("TAG", mLevel + "mlevel");
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, changeVolume, 0);
+        }
+    }
+
+    private void changeVolumeImage(int level) {
+        switch (level) {
+            case 0:
+                mOperationBg.getBackground().setLevel(0);
+                break;
+
+            case 30:
+                mOperationBg.getBackground().setLevel(30);
+                break;
+
+            case 60:
+                mOperationBg.getBackground().setLevel(60);
+                break;
+
+            case 100:
+                mOperationBg.getBackground().setLevel(100);
+                break;
         }
     }
 
@@ -333,7 +375,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
         }
         mHandler.removeMessages(AUTO_HIDE_MENU);
-        mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU,3000);
+        mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
     }
 
     private void setNextVideo() {
@@ -367,9 +409,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             //mIbVideoNext.setBackgroundResource(R.drawable.vector_drawable_video_next_gray);
         }
 
-        if (mPosition==0){
+        if (mPosition == 0) {
             mIbVideoPre.setEnabled(false);
-           // mIbVideoPre.setBackgroundResource(R.drawable.vector_drawable_video_pre_gray);
+            // mIbVideoPre.setBackgroundResource(R.drawable.vector_drawable_video_pre_gray);
         }
     }
 
