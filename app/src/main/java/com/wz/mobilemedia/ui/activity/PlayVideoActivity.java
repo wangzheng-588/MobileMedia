@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
+import com.wz.mobilemedia.ui.view.VerticalSeekBar;
 import com.wz.mobilemedia.ui.view.VideoView;
 import com.wz.mobilemedia.util.TimeUtils;
 
@@ -85,6 +86,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     RelativeLayout mRlVolume;
     @BindView(R.id.iv_light)
     ImageView mIvLight;
+    @BindView(R.id.vsb_volume)
+    VerticalSeekBar mVsbVolume;
 
 
 
@@ -136,6 +139,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     protected void init() {
         getWindowHeightWidth();
 
+        //设置seekbar最大声音值
+        mVsbVolume.setMax(15);
 
         //注册电池广播事件
         mBatteryReceiver = new BatteryReceiver();
@@ -182,6 +187,25 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mIbVideoNext.setOnClickListener(this);
         mIbVideoPre.setOnClickListener(this);
         mIbFullscrrent.setOnClickListener(this);
+        mVsbVolume.setOnSeekBarChangeListener(new VerticalSeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBar.setProgress(progress);
+                mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mHandler.removeCallbacksAndMessages(null);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                mHandler.sendEmptyMessage(CURRENT_POSITION);
+                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
+            }
+        });
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
 
     }
@@ -232,6 +256,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     public void hideMenu() {
         mControllerMenu.setVisibility(GONE);
         mHandler.removeMessages(AUTO_HIDE_MENU);
+        isShowControllerMenu = false;
     }
 
     /**
@@ -262,6 +287,10 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 startX = event.getX();
                 startY = event.getY();
                 mHandler.removeMessages(AUTO_HIDE_MENU);
+                long downTime = event.getDownTime();
+                long eventTime = event.getEventTime();
+                Log.e("TAG",downTime+"down");
+                Log.e("TAG",eventTime+"event");
 
                 break;
 
@@ -270,6 +299,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                 float endX = event.getX();
                 float endY = event.getY();
+
 
                 float moveX = endX - startX;
                 float moveY = endY - startY;
@@ -439,6 +469,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         changeVolumeImage(mLevel);
         mTvVolume.setText(mLevel + "");
 
+        mVsbVolume.setProgress(changeVolume);
         Log.e("TAG", mLevel + "mlevel");
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, changeVolume, 0);
     }
@@ -550,11 +581,14 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (fromUser) {
-            seekBar.setProgress(progress);
-            mVideoView.seekTo(progress);
 
-        }
+            if (fromUser) {
+                seekBar.setProgress(progress);
+                mVideoView.seekTo(progress);
+
+            }
+
+
     }
 
     @Override

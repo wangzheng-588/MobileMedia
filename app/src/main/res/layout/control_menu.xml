@@ -9,6 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <com.wz.mobilemedia.ui.view.VerticalSeekBar
+            android:id="@+id/vsb_volume"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:maxHeight="3dp"
+            android:thumb="@drawable/scrubber_control_selector"
+            android:layout_width="wrap_content"
+            android:progressDrawable="@drawable/seekbar_vertical"
+            android:layout_marginRight="20dp"
+            android:layout_height="180dp"/>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="34dp"
@@ -188,7 +199,7 @@
                 android:maxHeight="5dp"
                 android:thumb="@drawable/scrubber_control_selector"
                 android:id="@+id/mediacontroller_seekbar"
-                android:progress="300"
+
                 android:secondaryProgress="100"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -198,7 +209,7 @@
                 android:layout_toLeftOf="@id/ib_video_next"
                 android:layout_toRightOf="@id/ib_video_pre"
                 android:focusable="true"
-                android:max="1000"/>
+                />
 
 
 
