@@ -26,7 +26,6 @@
         <activity android:name=".ui.activity.WelcomeActivity"/>
         <activity android:name=".ui.activity.PlayVideoActivity"
                   android:theme="@style/full_screen"
-                  android:screenOrientation="landscape"
                   android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation">
         </activity>
         <activity
