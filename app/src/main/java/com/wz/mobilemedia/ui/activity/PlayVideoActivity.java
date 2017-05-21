@@ -139,8 +139,16 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     protected void init() {
         getWindowHeightWidth();
 
+        //获取音频管理器
+        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        //获取最大音量和当前音量
+        mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
         //设置seekbar最大声音值
-        mVsbVolume.setMax(15);
+        mVsbVolume.setMax(mMaxVolume);
+        int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+        mVsbVolume.setProgress(currentVolume);
 
         //注册电池广播事件
         mBatteryReceiver = new BatteryReceiver();
@@ -150,16 +158,38 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         //手势识别器
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
-            public boolean onDoubleTapEvent(MotionEvent e) {
-                return super.onDoubleTapEvent(e);
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                mHandler.removeMessages(AUTO_HIDE_MENU);
+
+                if (isShowControllerMenu) {
+                    hideMenu();
+                    isShowControllerMenu = false;
+                } else {
+                    showMenu();
+                    isShowControllerMenu = true;
+                }
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if(isFullScreen){
+                    setVideoType(DEFAULT_SCREEN);
+                }else{
+                    setVideoType(FULL_SCREEN);
+                }
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                setPlayButtonState();
+                super.onLongPress(e);
             }
         });
         mTimeUtils = new TimeUtils();
 
-        //获取音频管理器
-        mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        //获取最大音量和当前音量
-        mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+
 
 
         hideMenu();
@@ -273,24 +303,18 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     private float startX;
     private float startY;
-    private float endY;
-    private long startTime;
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        super.onTouchEvent(event);
+        mGestureDetector.onTouchEvent(event);
          float mDisX = 0;
          float mDisY = 0;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                startTime = System.currentTimeMillis();
                 startX = event.getX();
                 startY = event.getY();
                 mHandler.removeMessages(AUTO_HIDE_MENU);
-                long downTime = event.getDownTime();
-                long eventTime = event.getEventTime();
-                Log.e("TAG",downTime+"down");
-                Log.e("TAG",eventTime+"event");
 
                 break;
 
@@ -307,8 +331,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mDisX += moveX;
                 mDisY += moveY;
 
-               // Log.e("TAG","disx:"+ mDisX);
-               // Log.e("TAG","disy:"+ mDisY);
 
                 if (Math.abs(mDisX) > Math.abs(mDisY)&& Math.abs(mDisX)>8) {
 
@@ -332,21 +354,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 break;
 
             case MotionEvent.ACTION_UP:
-                long endTime = System.currentTimeMillis();
-
-                if (endTime - startTime < 150) {
-                    mHandler.removeMessages(AUTO_HIDE_MENU);
-
-                    if (isShowControllerMenu) {
-                        hideMenu();
-                        isShowControllerMenu = false;
-                    } else {
-                        showMenu();
-                        isShowControllerMenu = true;
-                    }
-                }
-
-                Log.e("TAG", "up" + (endTime - startTime));
 
                 mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
                 break;
@@ -364,6 +371,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mIvLight.setVisibility(View.VISIBLE);
         mPlayPause.setVisibility(GONE);
         mRlVolume.setVisibility(GONE);
+        isShowControllerMenu = true;
 
         float currentBrightness = getWindow().getAttributes().screenBrightness;
         float index =  ((disY / mHeight * mMaxVolume * 3) /50);
@@ -421,6 +429,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
 
     private void changePosition(float disX) {
+        isShowControllerMenu = true;
         mControllerMenu.setVisibility(View.VISIBLE);
         mIvLight.setVisibility(GONE);
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
@@ -446,6 +455,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     }
 
     private void changeVolume(float dis) {
+        isShowControllerMenu = true;
         mControllerMenu.setVisibility(View.VISIBLE);
         mIvLight.setVisibility(GONE);
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
@@ -515,7 +525,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 break;
 
             case R.id.ib_fullscrrent:
-                Log.e("TAG","全屏");
+
                 if(isFullScreen){
                     setVideoType(DEFAULT_SCREEN);
                 }else{
