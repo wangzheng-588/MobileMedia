@@ -11,6 +11,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.wz.mobilemedia.R;
+import com.wz.mobilemedia.bean.MediaInfoBean;
+
+import java.util.ArrayList;
 
 import io.vov.vitamio.MediaPlayer;
 import io.vov.vitamio.Vitamio;
@@ -23,6 +26,9 @@ public class VitamioPlayActivity extends AppCompatActivity implements MediaPlaye
     private ProgressBar pb;
     private TextView downloadRateView, loadRateView;
     private VideoView mVideoView;
+    private ArrayList<MediaInfoBean> mVideoPlays;
+    private int mPosition;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +55,9 @@ public class VitamioPlayActivity extends AppCompatActivity implements MediaPlaye
 
     //初始化数据
     private void initData() {
-        String mediaPath = getIntent().getStringExtra("mediaPath");
-        uri = Uri.parse(mediaPath);
+        mVideoPlays = (ArrayList<MediaInfoBean>) (getIntent().getSerializableExtra("videoList"));
+        mPosition = getIntent().getIntExtra("position", 0);
+        uri = Uri.parse(mVideoPlays.get(mPosition).getPath());
         mVideoView.setVideoURI(uri);//设置视频播放地址
         MediaController mediaController = new MediaController(this);
         mVideoView.setMediaController(mediaController);

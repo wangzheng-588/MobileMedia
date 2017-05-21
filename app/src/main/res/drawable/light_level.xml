@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:drawable="@drawable/light_20"
+        android:maxLevel="20">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_30"
+        android:maxLevel="30">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_40"
+        android:maxLevel="40">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_50"
+        android:maxLevel="50">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_60"
+        android:maxLevel="60">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_70"
+        android:maxLevel="70">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_80"
+        android:maxLevel="80">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_90"
+        android:maxLevel="90">
+
+    </item>
+    <item
+        android:drawable="@drawable/light_100"
+        android:maxLevel="100">
+
+    </item>
+
+</level-list>

@@ -7,7 +7,7 @@
     android:background="#000"
     tools:context="com.wz.mobilemedia.ui.activity.PlayVideoActivity">
 
-    <VideoView
+    <com.wz.mobilemedia.ui.view.VideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>

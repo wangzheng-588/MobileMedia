@@ -22,7 +22,7 @@ public class StorageListUtil {
 
     private ArrayList<String> mSListPath;
 
-    public static final   String[]  VIDEO_EXTENSIONS = {".avi",".mp4",".3gp",".wmv",".ts",".rmvb",".mov",".m4v",".m3u8",".3gpp",".3gpp2",
+    public static final   String[]  VIDEO_EXTENSIONS = {".mp4",".avi",".3gp",".wmv",".ts",".rmvb",".mov",".m4v",".m3u8",".3gpp",".3gpp2",
             ".mkv",".flv",".divx",".f4v",".rm",".asf",".ram",".mpg",".v8",".swf",".m2v",".asx",".ra",".ndivx",".xvid"};
     public static final String[] MUSIC_EXTENSIONS = {".mp3"};
 
@@ -84,19 +84,19 @@ public class StorageListUtil {
      * 扫描音乐，从手机文件夹中递归扫描
      */
     public List<String> scannerMedia(Context context,String[]  extensions) {
-
+        List<String> strings = null;
         mSListPath = new ArrayList<>();
 
         List<StorageInfo> list = StorageListUtil
                 .listAvaliableStorage(context);
         for (int i = 0; i < list.size(); i++) {
             StorageInfo storageInfo = list.get(i);
-            List<String> strings = scannerLocalMediaFile(storageInfo.path,extensions, true);
+            strings = scannerLocalMediaFile(storageInfo.path,extensions, true);
 
-            return strings;
         }
 
-        return null;
+        Log.e("TAG","大小:"+strings.size()+"");
+        return strings;
     }
 
 
@@ -136,9 +136,10 @@ public class StorageListUtil {
                     scannerLocalMediaFile(f.getPath(), extensions,IsIterative);
                 }
             }
-
-            return mSListPath;
+           // Log.e("TAG","大小:"+mSListPath.size()+"");
+            //return mSListPath;
         }
+        //Log.e("TAG","大小:"+mSListPath.size()+"");
         return mSListPath;
     }
 
@@ -154,7 +155,7 @@ public class StorageListUtil {
         List<MediaInfoBean> newVideos = new ArrayList<MediaInfoBean>();
         for (MediaInfoBean videoInfo : videoInfos) {
             File f = new File(videoInfo.getPath());
-            if (f.exists() && f.isFile() && f.length() > 10485760) {
+            if (f.exists() && f.isFile() && f.length() > 1024) {
                 newVideos.add(videoInfo);
                 Log.i("TGA", "文件大小" + f.length());
             } else {

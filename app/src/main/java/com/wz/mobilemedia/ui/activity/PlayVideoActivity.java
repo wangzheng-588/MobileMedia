@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
@@ -22,10 +23,10 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
+import com.wz.mobilemedia.ui.view.VideoView;
 import com.wz.mobilemedia.util.TimeUtils;
 
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     public static final int AUTO_HIDE_MENU = 1;
     public static final int CURRENT_POSITION = 2;
     private static final int CHANGE_VOLUME = 3;
+    private static final int FULL_SCREEN = 4;
+    private static final int DEFAULT_SCREEN = 5;
 
     @BindView(R.id.top_back)
     ImageButton mTopBack;
@@ -80,12 +83,14 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     TextView mTvVolume;
     @BindView(R.id.rl_volume)
     RelativeLayout mRlVolume;
+    @BindView(R.id.iv_light)
+    ImageView mIvLight;
 
 
 
     private boolean isShowControllerMenu;//是否显示控制菜单
     private boolean isPlay;//是否正在播放
-
+    private boolean isFullScreen = false;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -118,7 +123,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private int mHeight;
     private int mWidth;
     private BatteryReceiver mBatteryReceiver;
-
+    private int mVideoHeight;
+    private int mVideoWidth;
 
 
     @Override
@@ -175,6 +181,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mPlayPause.setOnClickListener(this);
         mIbVideoNext.setOnClickListener(this);
         mIbVideoPre.setOnClickListener(this);
+        mIbFullscrrent.setOnClickListener(this);
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
 
     }
@@ -197,6 +204,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                     mTvTimeTotal.setText(mTimeUtils.stringForTime(duration));
                     mMediacontrollerSeekbar.setMax(mp.getDuration());
                     mHandler.sendEmptyMessage(CURRENT_POSITION);
+                    mVideoHeight = mp.getVideoHeight();
+                    mVideoWidth = mp.getVideoWidth();
                 }
             });
 
@@ -207,7 +216,10 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Intent intent = new Intent(this, VitamioPlayActivity.class);
-
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("videoList",((ArrayList)mVideoPlays));
+        bundle.putInt("position",mPosition);
+        intent.putExtras(bundle);
         startActivity(intent);
         finish();
         return true;
@@ -219,7 +231,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
      */
     public void hideMenu() {
         mControllerMenu.setVisibility(GONE);
-        isShowControllerMenu = false;
         mHandler.removeMessages(AUTO_HIDE_MENU);
     }
 
@@ -228,11 +239,10 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
      */
     public void showMenu() {
         mControllerMenu.setVisibility(View.VISIBLE);
-
         mOperationTv.setVisibility(View.GONE);
-
+        mPlayPause.setVisibility(View.VISIBLE);
+        mOperationVolumeBrightness.setVisibility(GONE);
         mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
-        isShowControllerMenu = true;
     }
 
 
@@ -257,7 +267,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
             case MotionEvent.ACTION_MOVE:
                 mHandler.removeMessages(AUTO_HIDE_MENU);
-                showMenu();
+
                 float endX = event.getX();
                 float endY = event.getY();
 
@@ -270,7 +280,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                // Log.e("TAG","disx:"+ mDisX);
                // Log.e("TAG","disy:"+ mDisY);
 
-                if (Math.abs(mDisX) > Math.abs(mDisY)&&Math.abs(mDisX)>8) {
+                if (Math.abs(mDisX) > Math.abs(mDisY)&& Math.abs(mDisX)>8) {
 
                     //拖动改变视频快进
                     changePosition(mDisX);
@@ -299,8 +309,10 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                     if (isShowControllerMenu) {
                         hideMenu();
+                        isShowControllerMenu = false;
                     } else {
                         showMenu();
+                        isShowControllerMenu = true;
                     }
                 }
 
@@ -309,13 +321,20 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
                 break;
         }
-        return true;
+        return super.onTouchEvent(event);
     }
 
     /*
     改变亮度
      */
     private void changeBrightness(float disY) {
+        mControllerMenu.setVisibility(View.VISIBLE);
+        mOperationVolumeBrightness.setVisibility(View.VISIBLE);
+        mOperationTv.setVisibility(GONE);
+        mIvLight.setVisibility(View.VISIBLE);
+        mPlayPause.setVisibility(GONE);
+        mRlVolume.setVisibility(GONE);
+
         float currentBrightness = getWindow().getAttributes().screenBrightness;
         float index =  ((disY / mHeight * mMaxVolume * 3) /50);
 
@@ -329,11 +348,51 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         lpa.screenBrightness = changeBrightness;
         getWindow().setAttributes(lpa);
 
+        int level = (int) (currentBrightness / 255 * 100);
+        changeLightImage(level);
+        Log.e("TAG","lvel:"+level);
 
+    }
+
+    private void changeLightImage(int level) {
+
+        switch (level){
+            case 20:
+                mIvLight.getBackground().setLevel(20);
+                break;
+            case 30:
+                mIvLight.getBackground().setLevel(30);
+                break;
+            case 40:
+                mIvLight.getBackground().setLevel(40);
+                break;
+            case 50:
+                mIvLight.getBackground().setLevel(50);
+                break;
+            case 60:
+                mIvLight.getBackground().setLevel(60);
+                break;
+            case 70:
+                mIvLight.getBackground().setLevel(70);
+                break;
+            case 80:
+                mIvLight.getBackground().setLevel(80);
+                break;
+            case 90:
+                mIvLight.getBackground().setLevel(90);
+                break;
+            case 100:
+                mIvLight.getBackground().setLevel(100);
+                break;
+
+
+        }
     }
 
 
     private void changePosition(float disX) {
+        mControllerMenu.setVisibility(View.VISIBLE);
+        mIvLight.setVisibility(GONE);
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
         mOperationBg.setVisibility(GONE);
         mTvVolume.setVisibility(GONE);
@@ -357,6 +416,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     }
 
     private void changeVolume(float dis) {
+        mControllerMenu.setVisibility(View.VISIBLE);
+        mIvLight.setVisibility(GONE);
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
         mRlVolume.setVisibility(View.VISIBLE);
         mOperationBg.setVisibility(View.VISIBLE);
@@ -365,7 +426,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mPlayPause.setVisibility(GONE);
 
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        float index = (dis / mHeight * mMaxVolume * 3) / 20;
+        float index = (dis / mHeight * mMaxVolume * 3)/mMaxVolume;
         int volume = (int) (mMaxVolume * index) + currentVolume;
 
         int changeVolume = (volume > mMaxVolume ? mMaxVolume : volume) < 0 ? 0 : (volume > mMaxVolume ? mMaxVolume : volume);
@@ -420,6 +481,16 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             case R.id.ib_video_pre:
                 Toast.makeText(this, "上一个视频", Toast.LENGTH_SHORT).show();
                 setPreVideo();
+                break;
+
+            case R.id.ib_fullscrrent:
+                Log.e("TAG","全屏");
+                if(isFullScreen){
+                    setVideoType(DEFAULT_SCREEN);
+                }else{
+                    setVideoType(FULL_SCREEN);
+                }
+
                 break;
 
         }
@@ -561,5 +632,39 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     }
 
+    public void setVideoType(int type) {
+        switch (type) {
+            case FULL_SCREEN:
+                mVideoView.setVideoViewSize(mWidth, mHeight);
+                isFullScreen = true;
+                mIbFullscrrent.setBackgroundResource(R.drawable.ic_action_scale);
+                break;
 
+            case DEFAULT_SCREEN:
+
+                //屏幕的宽
+                int width = mWidth;
+                //屏幕的宽
+                int height = mHeight;
+                if (mVideoWidth > 0 && mVideoHeight > 0) {
+                    if (mVideoWidth * height > width * mVideoHeight) {
+                        //Log.i("@@@", "image too tall, correcting");
+                        height = width * mVideoHeight / mVideoWidth;
+                    } else if (mVideoWidth * height < width * mVideoHeight) {
+                        //Log.i("@@@", "image too wide, correcting");
+                        width = height * mVideoWidth / mVideoHeight;
+                    } else {
+                        //Log.i("@@@", "aspect ratio is correct: " +
+                        //width+"/"+height+"="+
+                        //mVideoWidth+"/"+mVideoHeight);
+                    }
+                }
+
+                mVideoView.setVideoViewSize(width, height);
+                mIbFullscrrent.setBackgroundResource(R.drawable.ic_action_scale);
+                isFullScreen = false;
+
+                break;
+        }
+    }
 }
