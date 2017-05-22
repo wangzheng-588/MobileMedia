@@ -46,19 +46,20 @@
                 android:text="file name"/>
 
             <ImageButton
-                android:id="@+id/ib_share"
+                android:id="@+id/ib_help"
                 android:layout_width="50dp"
                 android:layout_height="match_parent"
                 android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
                 android:background="@null"
-                android:src="@drawable/ic_action_share_without_padding"/>
+                android:src="@drawable/vector_drawable_help"/>
 
             <ImageButton
                 android:layout_centerVertical="true"
                 android:id="@+id/ib_battery"
                 android:layout_width="35dp"
                 android:layout_height="30dp"
-                android:layout_toLeftOf="@id/ib_share"
+                android:layout_toLeftOf="@id/ib_help"
                 android:background="@drawable/batter_level"
                />
 

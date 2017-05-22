@@ -1,7 +1,9 @@
 package com.wz.mobilemedia.ui.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -56,8 +58,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     ImageButton mTopBack;
     @BindView(R.id.tv_filename)
     TextView mTvFilename;
-    @BindView(R.id.ib_share)
-    ImageButton mIbShare;
+    @BindView(R.id.ib_help)
+    ImageButton mIbHelp;
     @BindView(R.id.ib_favorite)
     ImageButton mIbFavorite;
     @BindView(R.id.play_pause)
@@ -292,6 +294,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mIbVideoNext.setOnClickListener(this);
         mIbVideoPre.setOnClickListener(this);
         mIbFullscrrent.setOnClickListener(this);
+        mIbHelp.setOnClickListener(this);
         mVsbVolume.setOnSeekBarChangeListener(new VerticalSeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -367,6 +370,17 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        jumpVitamioPlay();
+
+        return true;
+    }
+
+    private void jumpVitamioPlay() {
+
+        if (mVideoView!=null){
+            mVideoView.stopPlayback();
+        }
+
         Intent intent = new Intent(this, VitamioPlayActivity.class);
         if (mVideoPlays!=null&&mVideoPlays.size()>0){
             Bundle bundle = new Bundle();
@@ -379,8 +393,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
         startActivity(intent);
         finish();
-
-        return true;
     }
 
 
@@ -647,10 +659,25 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                 break;
 
+            case R.id.ib_help:
+                new AlertDialog.Builder(this)
+                        .setTitle("提示")
+                        .setMessage("当前是系统播放器，如果有声音无画面，请确定跳转到万能播放器")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                jumpVitamioPlay();
+                            }
+                        })
+                        .show();
+                break;
+
         }
         mHandler.removeMessages(AUTO_HIDE_MENU);
         mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
     }
+
+
 
     private void setNextVideo() {
         mPosition++;

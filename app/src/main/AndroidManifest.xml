@@ -68,7 +68,10 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="stateAlwaysHidden"/>
-        <activity android:name=".ui.activity.VitamioPlayActivity">
+        <activity android:name=".ui.activity.VitamioPlayActivity"
+                  android:screenOrientation="landscape"
+                  android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
+                  android:theme="@style/noAnimation_Theme">
         </activity>
         <activity android:name=".ui.activity.PlayMusicActivity">
         </activity>

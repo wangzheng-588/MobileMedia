@@ -1,13 +1,16 @@
 package com.wz.mobilemedia.ui.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
@@ -54,8 +57,8 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
     ImageButton mTopBack;
     @BindView(R.id.tv_filename)
     TextView mTvFilename;
-    @BindView(R.id.ib_share)
-    ImageButton mIbShare;
+    @BindView(R.id.ib_help)
+    ImageButton mIbHelp;
     @BindView(R.id.ib_favorite)
     ImageButton mIbFavorite;
     @BindView(R.id.play_pause)
@@ -295,6 +298,7 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
         mIbVideoNext.setOnClickListener(this);
         mIbVideoPre.setOnClickListener(this);
         mIbFullscrrent.setOnClickListener(this);
+        mIbHelp.setOnClickListener(this);
         mVsbVolume.setOnSeekBarChangeListener(new VerticalSeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -322,13 +326,11 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.e("TAG", "start");
 
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.e("TAG", "stop");
 
             }
         });
@@ -629,9 +631,47 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
 
                 break;
 
+            case R.id.ib_help:
+                new AlertDialog.Builder(this)
+                        .setTitle("提示")
+                        .setMessage("当前是万能播放器，如果画质不好，请确定跳转到系统播放器")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                jumpSystemVideoPlay();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        })
+                        .show();
+                break;
+
         }
         mHandler.removeMessages(AUTO_HIDE_MENU);
         mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
+    }
+
+    private void jumpSystemVideoPlay() {
+
+        if (mVideoView!=null){
+            mVideoView.stopPlayback();
+        }
+
+        Intent intent = new Intent(this, PlayVideoActivity.class);
+        if (mVideoPlays!=null&&mVideoPlays.size()>0){
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
+            bundle.putInt("position", mPosition);
+            intent.putExtras(bundle);
+        } else if (mUri!=null){
+            intent.setDataAndType(mUri,"video/*");
+        }
+
+        startActivity(intent);
     }
 
     private void setNextVideo() {
@@ -741,12 +781,14 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        Toast.makeText(VitamioPlayActivity.this, "当前网络不好或者视频损坏", Toast.LENGTH_SHORT).show();
         return false;
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-
+        Toast.makeText(this, "播放完成", Toast.LENGTH_SHORT).show();
+        finish();
     }
 
 
