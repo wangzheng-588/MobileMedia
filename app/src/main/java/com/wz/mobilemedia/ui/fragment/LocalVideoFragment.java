@@ -32,7 +32,10 @@ public class LocalVideoFragment extends BaseMediaInfoFragment  {
         mAdapter.setOnRecyclerViewItemListener(new MediaInfoAdapter.OnRecyclerViewItemListener() {
             @Override
             public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
+                //跳转到系统播放器
                 Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
+                //跳转到vitamio播放器
+                //Intent intent = new Intent(getActivity(), VitamioPlayActivity.class);
 
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("videoList",(ArrayList<MediaInfoBean>)mediaInfoBeens);

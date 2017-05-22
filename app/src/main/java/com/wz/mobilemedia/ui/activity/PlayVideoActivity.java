@@ -1,7 +1,9 @@
 package com.wz.mobilemedia.ui.activity;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -27,6 +29,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.network.connectionclass.ConnectionClassManager;
+import com.facebook.network.connectionclass.ConnectionQuality;
 import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.ui.view.VerticalSeekBar;
@@ -105,6 +109,22 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private boolean isShowControllerMenu;//是否显示控制菜单
     private boolean isPlay;//是否正在播放
     private boolean isFullScreen = false;
+    private TimeUtils mTimeUtils;
+    private AudioManager mAudioManager;
+    private List<MediaInfoBean> mVideoPlays;
+    private int mPosition;
+    private GestureDetector mGestureDetector;
+    private int mMaxVolume;
+    private int mLevel;
+    private DisplayMetrics mMetric;
+    private int mHeight;
+    private int mWidth;
+    private BatteryReceiver mBatteryReceiver;
+    private int mVideoHeight;
+    private int mVideoWidth;
+    private Uri mUri;
+    private boolean mIsNetUri;
+
 
     private Handler mHandler = new Handler() {
         @Override
@@ -148,6 +168,20 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             }
 
             prePosition = currentPosition;
+//            DeviceBandwidthSampler.getInstance().startSampling();
+//            ConnectionQuality currentBandwidthQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
+//            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
+//
+//            Log.e("TAG","connectionQuality:"+currentBandwidthQuality+" downloadKBitsPerSecond:"+downloadKBitsPerSecond+" kb/s");
+
+//            int uid = TrafficBean.getInstance(this, mHandler).getUid();
+//
+//            TrafficBean trafficBean = new TrafficBean(this, mHandler, uid);
+//            trafficBean.startCalculateNetSpeed();
+//            double netSpeed = trafficBean.getNetSpeed();
+//            long trafficInfo = trafficBean.getTrafficInfo();
+//            Log.e("TAG",trafficInfo+"");
+
         } else {
             mLlNetSpeed.setVisibility(GONE);
         }
@@ -164,21 +198,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         }
     }
 
-    private TimeUtils mTimeUtils;
-    private AudioManager mAudioManager;
-    private List<MediaInfoBean> mVideoPlays;
-    private int mPosition;
-    private GestureDetector mGestureDetector;
-    private int mMaxVolume;
-    private int mLevel;
-    private DisplayMetrics mMetric;
-    private int mHeight;
-    private int mWidth;
-    private BatteryReceiver mBatteryReceiver;
-    private int mVideoHeight;
-    private int mVideoWidth;
-    private Uri mUri;
-    private boolean mIsNetUri;
 
 
     @Override
@@ -198,6 +217,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         initListener();
         getData();
         initPlay(mPosition);
+
 
     }
 
@@ -349,14 +369,27 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
-        Intent intent = new Intent(this, VitamioPlayActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
-        bundle.putInt("position", mPosition);
-        intent.putExtras(bundle);
-        startActivity(intent);
-        finish();
-        return true;
+
+        new AlertDialog.Builder(this).setMessage("视频播放出错")
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(PlayVideoActivity.this, VitamioPlayActivity.class);
+                        if (mVideoPlays!=null&&mVideoPlays.size()>0){
+                            Bundle bundle = new Bundle();
+                            bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
+                            bundle.putInt("position", mPosition);
+                            intent.putExtras(bundle);
+                        } else if (mUri!=null){
+                            intent.setDataAndType(mUri,"video/*");
+                        }
+
+                        startActivity(intent);
+                        finish();
+                    }
+                }).show();
+
+        return false;
     }
 
 
@@ -445,6 +478,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     改变亮度
      */
     private void changeBrightness(float disY) {
+        mLlNetSpeed.setVisibility(GONE);
         mControllerMenu.setVisibility(View.VISIBLE);
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
         mOperationTv.setVisibility(GONE);
@@ -511,6 +545,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
 
     private void changePosition(float disX) {
+        mLlNetSpeed.setVisibility(GONE);
         isShowControllerMenu = true;
         mControllerMenu.setVisibility(View.VISIBLE);
         mIvLight.setVisibility(GONE);
@@ -549,6 +584,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mOperationTv.setVisibility(GONE);
         mPlayPause.setVisibility(GONE);
         mTvLight.setVisibility(GONE);
+        mLlNetSpeed.setVisibility(GONE);
 
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         // float index = (dis / mHeight * mMaxVolume * 3)/mMaxVolume;
@@ -711,6 +747,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             mBatteryReceiver = null;
         }
 
+        if (mConnectionChangedListener!=null){
+            ConnectionClassManager.getInstance().remove(mConnectionChangedListener);
+        }
     }
 
     /**
@@ -812,5 +851,24 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             return true;
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    ConnectionChangedListener mConnectionChangedListener;
+
+    private class ConnectionChangedListener implements
+            ConnectionClassManager.ConnectionClassStateChangeListener {
+        @Override
+        public void onBandwidthStateChange(ConnectionQuality bandwidthState) {
+            Log.e("onBandwidthStateChange", bandwidthState.toString());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mConnectionChangedListener!=null){
+
+            ConnectionClassManager.getInstance().register(mConnectionChangedListener);
+        }
     }
 }

@@ -42,11 +42,14 @@ public abstract class BaseActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(setLayoutResID());
+        initVitamio();
         mBind = ButterKnife.bind(this);
 
         init();
 
     }
+
+    protected void initVitamio(){};
 
     protected abstract void init();
 

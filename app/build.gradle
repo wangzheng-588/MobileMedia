@@ -58,5 +58,5 @@ dependencies {
     compile 'com.jakewharton:butterknife-compiler:8.6.0'
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.11-rc2'
-
+    compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
 }
