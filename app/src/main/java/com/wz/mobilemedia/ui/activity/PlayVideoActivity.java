@@ -104,6 +104,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     LinearLayout mLlNetSpeed;
     @BindView(R.id.tv_speed)
     TextView mTvSpeed2;
+    @BindView(R.id.ib_volume)
+    ImageButton mIbVolume;
 
 
     private boolean isShowControllerMenu;//是否显示控制菜单
@@ -124,6 +126,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private int mVideoWidth;
     private Uri mUri;
     private boolean mIsNetUri;
+    private boolean isMute;//是否静音
 
 
     private Handler mHandler = new Handler() {
@@ -158,6 +161,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     private int prePosition;
     private NetUtils mNetUtils;
+    private int mCurrentVolume;
 
     private void setNetSpeed(int currentPosition) {
 
@@ -287,6 +291,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mIbVideoPre.setOnClickListener(this);
         mIbFullscrrent.setOnClickListener(this);
         mIbHelp.setOnClickListener(this);
+        mIbVolume.setOnClickListener(this);
         mVsbVolume.setOnSeekBarChangeListener(new VerticalSeekBar.OnSeekBarChangeListener() {
 
             @Override
@@ -304,7 +309,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mTvVolume.setText(volumeIndex + "");
 
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
-
+                changeVolumeImage(progress*100/mMaxVolume);
                 mHandler.removeCallbacksAndMessages(null);
 
                 mHandler.sendEmptyMessage(CURRENT_POSITION);
@@ -603,22 +608,15 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
 
     private void changeVolumeImage(int level) {
-        switch (level) {
-            case 0:
-                mOperationBg.getBackground().setLevel(0);
-                break;
 
-            case 30:
-                mOperationBg.getBackground().setLevel(30);
-                break;
-
-            case 60:
-                mOperationBg.getBackground().setLevel(60);
-                break;
-
-            case 100:
-                mOperationBg.getBackground().setLevel(100);
-                break;
+        if (level<=0){
+            mOperationBg.getBackground().setLevel(0);
+        } else if (level<=30){
+            mOperationBg.getBackground().setLevel(30);
+        } else if (level<=60){
+            mOperationBg.getBackground().setLevel(60);
+        } else if (level<=100){
+            mOperationBg.getBackground().setLevel(100);
         }
     }
 
@@ -662,6 +660,20 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                             }
                         })
                         .show();
+                break;
+
+            case R.id.ib_volume:
+                if (isMute){
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, mCurrentVolume, 0);
+                    mVsbVolume.setProgress(mCurrentVolume);
+                    changeVolumeImage(mCurrentVolume*100/mMaxVolume);
+                    isMute = false;
+                } else {
+                    mCurrentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
+                    mVsbVolume.setProgress(0);
+                    isMute = true;
+                }
                 break;
 
         }

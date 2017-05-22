@@ -103,7 +103,8 @@ public class VitamioPlayActivity extends BaseActivity implements View.OnClickLis
     LinearLayout mLlNetSpeed;
     @BindView(R.id.tv_speed)
     TextView mTvSpeed2;
-
+    @BindView(R.id.ib_volume)
+    ImageButton mIbVolume;
 
     private boolean isShowControllerMenu;//是否显示控制菜单
     private boolean isPlay;//是否正在播放

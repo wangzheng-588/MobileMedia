@@ -9,16 +9,34 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.wz.mobilemedia.ui.view.VerticalSeekBar
-            android:id="@+id/vsb_volume"
+        <LinearLayout
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:maxHeight="3dp"
-            android:thumb="@drawable/scrubber_control_selector"
-            android:layout_width="wrap_content"
-            android:progressDrawable="@drawable/seekbar_vertical"
             android:layout_marginRight="20dp"
-            android:layout_height="180dp"/>
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.wz.mobilemedia.ui.view.VerticalSeekBar
+                android:id="@+id/vsb_volume"
+              android:layout_gravity="center"
+                android:maxHeight="3dp"
+                android:thumb="@drawable/scrubber_control_selector"
+                android:layout_width="wrap_content"
+                android:progressDrawable="@drawable/seekbar_vertical"
+
+                android:layout_height="180dp"/>
+
+            <ImageButton
+                android:layout_gravity="center"
+                android:id="@+id/ib_volume"
+                android:background="@drawable/volmn_100"
+                android:layout_width="40dp"
+                android:layout_height="40dp"/>
+
+        </LinearLayout>
+
+
 
         <RelativeLayout
             android:layout_width="match_parent"
