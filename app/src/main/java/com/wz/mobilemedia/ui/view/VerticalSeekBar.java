@@ -134,18 +134,12 @@ public class VerticalSeekBar extends SeekBar {
                 }
                 else
                 {
-                    // Touch up when we never crossed the touch slop threshold
-                    // should
-                    // be interpreted as a tap-seek to that location.
                     onStartTrackingTouch();
                     trackTouchEvent(event);
                     onStopTrackingTouch();
 
                 }
                 onSizeChanged(getWidth(), getHeight(), 0, 0);
-                // ProgressBar doesn't know to repaint the thumb drawable
-                // in its inactive state when the touch stops (because the
-                // value has not apparently changed)
                 invalidate();
                 break;
         }
@@ -221,6 +215,7 @@ public class VerticalSeekBar extends SeekBar {
         onSizeChanged(getWidth(), getHeight(), 0, 0);
 
     }
+
 
 
 }

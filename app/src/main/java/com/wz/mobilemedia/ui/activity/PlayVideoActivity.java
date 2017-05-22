@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,11 +15,13 @@ import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -28,6 +31,7 @@ import com.wz.mobilemedia.R;
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.ui.view.VerticalSeekBar;
 import com.wz.mobilemedia.ui.view.VideoView;
+import com.wz.mobilemedia.util.NetUtils;
 import com.wz.mobilemedia.util.TimeUtils;
 
 import java.util.ArrayList;
@@ -88,7 +92,14 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     ImageView mIvLight;
     @BindView(R.id.vsb_volume)
     VerticalSeekBar mVsbVolume;
-
+    @BindView(R.id.tv_light)
+    TextView mTvLight;
+    @BindView(R.id.tv_net_speed)
+    TextView mTvSpeed1;
+    @BindView(R.id.ll_net_speed)
+    LinearLayout mLlNetSpeed;
+    @BindView(R.id.tv_speed)
+    TextView mTvSpeed2;
 
 
     private boolean isShowControllerMenu;//是否显示控制菜单
@@ -105,16 +116,54 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                 case CURRENT_POSITION:
                     mHandler.removeMessages(CURRENT_POSITION);
+                    int currentPosition = mVideoView.getCurrentPosition();
                     if (mVideoView != null) {
 
-                        mTvTimeCurrent.setText(mTimeUtils.stringForTime(mVideoView.getCurrentPosition()));
+                        mTvTimeCurrent.setText(mTimeUtils.stringForTime(currentPosition));
                         mMediacontrollerSeekbar.setProgress(mVideoView.getCurrentPosition());
                     }
+
+                    setNetBuffer();
+
+
+                    setNetSpeed(currentPosition);
+
                     mHandler.sendEmptyMessageDelayed(CURRENT_POSITION, 1000);
                     break;
             }
         }
     };
+
+    private int prePosition;
+
+    private void setNetSpeed(int currentPosition) {
+
+        if (mIsNetUri){
+            int duration = currentPosition - prePosition;
+
+            if (duration<500){
+                mLlNetSpeed.setVisibility(View.VISIBLE);
+            } else {
+                mLlNetSpeed.setVisibility(GONE);
+            }
+
+            prePosition = currentPosition;
+        } else {
+            mLlNetSpeed.setVisibility(GONE);
+        }
+
+    }
+
+    private void setNetBuffer() {
+        if (mIsNetUri) {
+            int bufferPercentage = mVideoView.getBufferPercentage();
+            int buffer = bufferPercentage * mMediacontrollerSeekbar.getMax();
+            buffer = buffer / 100;
+            mMediacontrollerSeekbar.setSecondaryProgress(buffer);
+
+        }
+    }
+
     private TimeUtils mTimeUtils;
     private AudioManager mAudioManager;
     private List<MediaInfoBean> mVideoPlays;
@@ -128,6 +177,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private BatteryReceiver mBatteryReceiver;
     private int mVideoHeight;
     private int mVideoWidth;
+    private Uri mUri;
+    private boolean mIsNetUri;
 
 
     @Override
@@ -137,24 +188,39 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     protected void init() {
-        getWindowHeightWidth();
 
+        mTimeUtils = new TimeUtils();
+        getWindowHeightWidth();
+        initVolume();
+        initBatterBroadcast();
+        initGestureDetector();
+        hideMenu();
+        initListener();
+        getData();
+        initPlay(mPosition);
+
+    }
+
+    private void initBatterBroadcast() {
+        //注册电池广播事件
+        mBatteryReceiver = new BatteryReceiver();
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        this.registerReceiver(mBatteryReceiver, ifilter);
+    }
+
+    private void initVolume() {
         //获取音频管理器
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         //获取最大音量和当前音量
         mMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-
         //设置seekbar最大声音值
         mVsbVolume.setMax(mMaxVolume);
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
         mVsbVolume.setProgress(currentVolume);
+    }
 
-        //注册电池广播事件
-        mBatteryReceiver = new BatteryReceiver();
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        this.registerReceiver(mBatteryReceiver, ifilter);
-
+    private void initGestureDetector() {
         //手势识别器
         mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
@@ -173,9 +239,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                if(isFullScreen){
+                if (isFullScreen) {
                     setVideoType(DEFAULT_SCREEN);
-                }else{
+                } else {
                     setVideoType(FULL_SCREEN);
                 }
                 return super.onDoubleTap(e);
@@ -187,21 +253,12 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 super.onLongPress(e);
             }
         });
-        mTimeUtils = new TimeUtils();
+    }
 
-
-
-
-        hideMenu();
-        initListener();
-
-
+    private void getData() {
+        mUri = getIntent().getData();
         mVideoPlays = (ArrayList<MediaInfoBean>) (getIntent().getSerializableExtra("videoList"));
         mPosition = getIntent().getIntExtra("position", 0);
-        //mMediaPath = getIntent().getStringExtra("mediaPath");
-
-        initPlay(mPosition);
-
     }
 
     private void getWindowHeightWidth() {
@@ -222,18 +279,36 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 seekBar.setProgress(progress);
+                int volumeIndex = progress * 100 / mMaxVolume;
+
+                mOperationVolumeBrightness.setVisibility(View.VISIBLE);
+                mPlayPause.setVisibility(GONE);
+                mIvLight.setVisibility(GONE);
+                mTvLight.setVisibility(GONE);
+                mTvVolume.setVisibility(View.VISIBLE);
+                mOperationBg.setVisibility(View.VISIBLE);
+                mRlVolume.setVisibility(View.VISIBLE);
+                mTvVolume.setText(volumeIndex + "");
+
                 mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
+
+                mHandler.removeCallbacksAndMessages(null);
+
+                mHandler.sendEmptyMessage(CURRENT_POSITION);
+                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
+
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                mHandler.removeCallbacksAndMessages(null);
+                Log.e("TAG", "start");
+
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                mHandler.sendEmptyMessage(CURRENT_POSITION);
-                mHandler.sendEmptyMessageDelayed(AUTO_HIDE_MENU, 3000);
+                Log.e("TAG", "stop");
+
             }
         });
         mMediacontrollerSeekbar.setOnSeekBarChangeListener(this);
@@ -245,25 +320,30 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
         if (mVideoPlays != null && mVideoPlays.size() > 0) {
             mVideoView.setVideoPath(mVideoPlays.get(position).getPath());
+            mTvFilename.setText(mVideoPlays.get(position).getTile());
+            mIsNetUri = NetUtils.isNetUri(mVideoPlays.get(position).getPath());
 
-            mVideoView.start();
-            mVideoView.setOnErrorListener(this);
-            mVideoView.setOnCompletionListener(this);
-
-            mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    int duration = mp.getDuration();
-                    mTvFilename.setText(mVideoPlays.get(position).getTile());
-                    mTvTimeTotal.setText(mTimeUtils.stringForTime(duration));
-                    mMediacontrollerSeekbar.setMax(mp.getDuration());
-                    mHandler.sendEmptyMessage(CURRENT_POSITION);
-                    mVideoHeight = mp.getVideoHeight();
-                    mVideoWidth = mp.getVideoWidth();
-                }
-            });
-
+        } else if (mUri != null) {
+            mVideoView.setVideoURI(mUri);
+            mIsNetUri = NetUtils.isNetUri(String.valueOf(mUri));
         }
+
+
+        mVideoView.setOnErrorListener(this);
+        mVideoView.setOnCompletionListener(this);
+
+        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                int duration = mp.getDuration();
+                mTvTimeTotal.setText(mTimeUtils.stringForTime(duration));
+                mMediacontrollerSeekbar.setMax(mp.getDuration());
+                mHandler.sendEmptyMessage(CURRENT_POSITION);
+                mVideoHeight = mp.getVideoHeight();
+                mVideoWidth = mp.getVideoWidth();
+                mp.start();
+            }
+        });
 
     }
 
@@ -271,8 +351,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Intent intent = new Intent(this, VitamioPlayActivity.class);
         Bundle bundle = new Bundle();
-        bundle.putSerializable("videoList",((ArrayList)mVideoPlays));
-        bundle.putInt("position",mPosition);
+        bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
+        bundle.putInt("position", mPosition);
         intent.putExtras(bundle);
         startActivity(intent);
         finish();
@@ -308,8 +388,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         mGestureDetector.onTouchEvent(event);
-         float mDisX = 0;
-         float mDisY = 0;
+        float mDisX = 0;
+        float mDisY = 0;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 startX = event.getX();
@@ -332,14 +412,14 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mDisY += moveY;
 
 
-                if (Math.abs(mDisX) > Math.abs(mDisY)&& Math.abs(mDisX)>8) {
+                if (Math.abs(mDisX) > Math.abs(mDisY) && Math.abs(mDisX) > 8) {
 
                     //拖动改变视频快进
                     changePosition(mDisX);
 
-                } else if (Math.abs(mDisX) < Math.abs(mDisY)&&Math.abs(mDisY)>8) {
+                } else if (Math.abs(mDisX) < Math.abs(mDisY) && Math.abs(mDisY) > 8) {
 
-                    if (startX<mWidth/2){
+                    if (startX < mWidth / 2) {
                         //改变亮度
                         changeBrightness(-mDisY);
 
@@ -369,32 +449,34 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mOperationVolumeBrightness.setVisibility(View.VISIBLE);
         mOperationTv.setVisibility(GONE);
         mIvLight.setVisibility(View.VISIBLE);
+        mTvLight.setVisibility(View.VISIBLE);
         mPlayPause.setVisibility(GONE);
         mRlVolume.setVisibility(GONE);
         isShowControllerMenu = true;
 
         float currentBrightness = getWindow().getAttributes().screenBrightness;
-        float index =  ((disY / mHeight * mMaxVolume * 3) /50);
+        float index = ((disY / mHeight * mMaxVolume * 3) / 50);
 
 
-        int brightness = (int) (currentBrightness+255*index);
+        int brightness = (int) (currentBrightness + 255 * index);
 
 
-        int changeBrightness = (brightness>255?255:brightness)<0?0:(brightness>255?255:brightness);
-        Log.e("TAG",changeBrightness+"");
+        int changeBrightness = (brightness > 255 ? 255 : brightness) < 0 ? 0 : (brightness > 255 ? 255 : brightness);
+        Log.e("TAG", changeBrightness + "");
         WindowManager.LayoutParams lpa = getWindow().getAttributes();
         lpa.screenBrightness = changeBrightness;
         getWindow().setAttributes(lpa);
 
         int level = (int) (currentBrightness / 255 * 100);
         changeLightImage(level);
-        Log.e("TAG","lvel:"+level);
+        mTvLight.setText(level + "%");
+        Log.e("TAG", "lvel:" + level);
 
     }
 
     private void changeLightImage(int level) {
 
-        switch (level){
+        switch (level) {
             case 20:
                 mIvLight.getBackground().setLevel(20);
                 break;
@@ -437,20 +519,22 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mTvVolume.setVisibility(GONE);
         mPlayPause.setVisibility(GONE);
         mOperationTv.setVisibility(View.VISIBLE);
+        mTvLight.setVisibility(GONE);
+
+
         int duration = mVideoView.getDuration();
         int currentPosition = mVideoView.getCurrentPosition();
 
-        int index = (int) (disX / mWidth * duration * 3/10);
-        Log.e("TAG","INDEX:"+index);
-        Log.e("TAG","duration:"+duration);
+        //int index = (int) (disX / mWidth * duration * 3/10);
+        int index = (int) (disX / mWidth * duration);
 
-        int position = currentPosition+index;
+        int position = currentPosition + index;
 
-        int changePosition = (position>duration?duration:position)<0?0:(position>duration?duration:position);
+        int changePosition = (position > duration ? duration : position) < 0 ? 0 : (position > duration ? duration : position);
 
         mVideoView.seekTo(changePosition);
 
-        mOperationTv.setText(mTimeUtils.stringForTime(changePosition)+"/"+mTimeUtils.stringForTime(duration));
+        mOperationTv.setText(mTimeUtils.stringForTime(changePosition) + "/" + mTimeUtils.stringForTime(duration));
 
     }
 
@@ -464,10 +548,13 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mTvVolume.setVisibility(View.VISIBLE);
         mOperationTv.setVisibility(GONE);
         mPlayPause.setVisibility(GONE);
+        mTvLight.setVisibility(GONE);
 
         int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-        float index = (dis / mHeight * mMaxVolume * 3)/mMaxVolume;
-        int volume = (int) (mMaxVolume * index) + currentVolume;
+        // float index = (dis / mHeight * mMaxVolume * 3)/mMaxVolume;
+        float index = dis / mHeight * mMaxVolume;
+        // int volume = (int) (mMaxVolume * index) + currentVolume;
+        int volume = (int) index + currentVolume;
 
         int changeVolume = (volume > mMaxVolume ? mMaxVolume : volume) < 0 ? 0 : (volume > mMaxVolume ? mMaxVolume : volume);
         if (changeVolume == 0) {
@@ -480,7 +567,6 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
         mTvVolume.setText(mLevel + "");
 
         mVsbVolume.setProgress(changeVolume);
-        Log.e("TAG", mLevel + "mlevel");
         mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, changeVolume, 0);
     }
 
@@ -526,9 +612,9 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
             case R.id.ib_fullscrrent:
 
-                if(isFullScreen){
+                if (isFullScreen) {
                     setVideoType(DEFAULT_SCREEN);
-                }else{
+                } else {
                     setVideoType(FULL_SCREEN);
                 }
 
@@ -592,11 +678,11 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-            if (fromUser) {
-                seekBar.setProgress(progress);
-                mVideoView.seekTo(progress);
+        if (fromUser) {
+            seekBar.setProgress(progress);
+            mVideoView.seekTo(progress);
 
-            }
+        }
 
 
     }
@@ -615,12 +701,12 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mHandler!=null){
+        if (mHandler != null) {
             mHandler.removeCallbacksAndMessages(null);
             mHandler = null;
         }
 
-        if (mBatteryReceiver!=null){
+        if (mBatteryReceiver != null) {
             unregisterReceiver(mBatteryReceiver);
             mBatteryReceiver = null;
         }
@@ -685,22 +771,16 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 break;
 
             case DEFAULT_SCREEN:
-
-                //屏幕的宽
                 int width = mWidth;
-                //屏幕的宽
+
                 int height = mHeight;
                 if (mVideoWidth > 0 && mVideoHeight > 0) {
                     if (mVideoWidth * height > width * mVideoHeight) {
-                        //Log.i("@@@", "image too tall, correcting");
+
                         height = width * mVideoHeight / mVideoWidth;
                     } else if (mVideoWidth * height < width * mVideoHeight) {
-                        //Log.i("@@@", "image too wide, correcting");
+
                         width = height * mVideoWidth / mVideoHeight;
-                    } else {
-                        //Log.i("@@@", "aspect ratio is correct: " +
-                        //width+"/"+height+"="+
-                        //mVideoWidth+"/"+mVideoHeight);
                     }
                 }
 
@@ -710,5 +790,27 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
                 break;
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        int currentVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+
+            currentVolume--;
+            currentVolume = (currentVolume > mMaxVolume ? mMaxVolume : currentVolume) < 0 ? 0 : (currentVolume > mMaxVolume ? mMaxVolume : currentVolume);
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+
+            currentVolume++;
+            currentVolume = (currentVolume > mMaxVolume ? mMaxVolume : currentVolume) < 0 ? 0 : (currentVolume > mMaxVolume ? mMaxVolume : currentVolume);
+            mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, currentVolume, 0);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 }

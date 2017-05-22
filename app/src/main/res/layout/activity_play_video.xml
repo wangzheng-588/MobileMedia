@@ -15,5 +15,27 @@
 
     <include android:id="@+id/menu_controller" layout="@layout/control_menu"/>
 
+    <LinearLayout
+        android:layout_centerInParent="true"
+        android:id="@+id/ll_net_speed"
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            android:layout_width="45dp"
+            android:layout_height="45dp"/>
+
+
+        <TextView
+            android:layout_gravity="center"
+            android:id="@+id/tv_speed"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
 
 </RelativeLayout>
