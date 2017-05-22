@@ -143,6 +143,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                         mMediacontrollerSeekbar.setProgress(mVideoView.getCurrentPosition());
                     }
 
+                    String s = mNetUtils.showNetSpeed(PlayVideoActivity.this);
+                    Log.e("TAG",s);
                     setNetBuffer();
 
 
@@ -155,6 +157,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     };
 
     private int prePosition;
+    private NetUtils mNetUtils;
 
     private void setNetSpeed(int currentPosition) {
 
@@ -168,19 +171,8 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
             }
 
             prePosition = currentPosition;
-//            DeviceBandwidthSampler.getInstance().startSampling();
-//            ConnectionQuality currentBandwidthQuality = ConnectionClassManager.getInstance().getCurrentBandwidthQuality();
-//            double downloadKBitsPerSecond = ConnectionClassManager.getInstance().getDownloadKBitsPerSecond();
-//
-//            Log.e("TAG","connectionQuality:"+currentBandwidthQuality+" downloadKBitsPerSecond:"+downloadKBitsPerSecond+" kb/s");
 
-//            int uid = TrafficBean.getInstance(this, mHandler).getUid();
-//
-//            TrafficBean trafficBean = new TrafficBean(this, mHandler, uid);
-//            trafficBean.startCalculateNetSpeed();
-//            double netSpeed = trafficBean.getNetSpeed();
-//            long trafficInfo = trafficBean.getTrafficInfo();
-//            Log.e("TAG",trafficInfo+"");
+
 
         } else {
             mLlNetSpeed.setVisibility(GONE);
@@ -207,7 +199,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     protected void init() {
-
+        mNetUtils = new NetUtils();
         mTimeUtils = new TimeUtils();
         getWindowHeightWidth();
         initVolume();
