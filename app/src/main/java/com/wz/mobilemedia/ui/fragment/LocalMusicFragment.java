@@ -7,6 +7,9 @@ import android.view.View;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
+import com.wz.mobilemedia.data.MediaInfoModel;
+import com.wz.mobilemedia.presenter.MediaPresenter;
+import com.wz.mobilemedia.presenter.contract.MediaInfoContract;
 import com.wz.mobilemedia.ui.adapter.MediaInfoAdapter;
 
 import java.util.List;
@@ -15,7 +18,15 @@ import java.util.List;
  * Created by wz on 17-5-18.
  */
 
-public class LocalMusicFragment extends BaseMediaInfoFragment {
+public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> implements MediaInfoContract.View{
+
+
+
+    @Override
+    protected void init() {
+        MediaInfoModel mediaInfoModel = new MediaInfoModel();
+        mMediaPresenter = new MediaPresenter(mediaInfoModel, this);
+    }
 
 
     @Override
@@ -29,6 +40,11 @@ public class LocalMusicFragment extends BaseMediaInfoFragment {
     protected void initView() {
         super.initView();
         mRlTemplateBottom.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    protected MediaInfoAdapter setAdapter() {
+        return new MediaInfoAdapter(mContext);
     }
 
 
@@ -61,6 +77,31 @@ public class LocalMusicFragment extends BaseMediaInfoFragment {
     @Override
     protected void onFragmentVisibleChange(boolean isVisible) {
 
+    }
+
+
+
+    @Override
+    public void showResult(List<MediaInfoBean> mediaInfoBeans) {
+        if (mediaInfoBeans!=null){
+            mAdapter.setMediaInfoBeens(mediaInfoBeans);
+        }
+    }
+
+
+    @Override
+    public void showProgress() {
+        mViewProgress.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissProgress() {
+        mViewProgress.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showEmpty() {
+        mViewEmpty.setVisibility(View.VISIBLE);
     }
 
 }
