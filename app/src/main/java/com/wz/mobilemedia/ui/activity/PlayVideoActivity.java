@@ -1,9 +1,7 @@
 package com.wz.mobilemedia.ui.activity;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -369,27 +367,20 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
+        Intent intent = new Intent(this, VitamioPlayActivity.class);
+        if (mVideoPlays!=null&&mVideoPlays.size()>0){
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
+            bundle.putInt("position", mPosition);
+            intent.putExtras(bundle);
+        } else if (mUri!=null){
+            intent.setDataAndType(mUri,"video/*");
+        }
 
-        new AlertDialog.Builder(this).setMessage("视频播放出错")
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(PlayVideoActivity.this, VitamioPlayActivity.class);
-                        if (mVideoPlays!=null&&mVideoPlays.size()>0){
-                            Bundle bundle = new Bundle();
-                            bundle.putSerializable("videoList", ((ArrayList) mVideoPlays));
-                            bundle.putInt("position", mPosition);
-                            intent.putExtras(bundle);
-                        } else if (mUri!=null){
-                            intent.setDataAndType(mUri,"video/*");
-                        }
+        startActivity(intent);
+        finish();
 
-                        startActivity(intent);
-                        finish();
-                    }
-                }).show();
-
-        return false;
+        return true;
     }
 
 
