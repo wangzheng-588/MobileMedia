@@ -25,6 +25,7 @@ public class NetVideoPresenter extends BasePresenter<MediaInfoModel, NetVideoCon
     }
 
     public void requestData(){
+        mView.showProgress();
        mModel.getNetMoive().map(new Function<BaseMoive, List<MoiveInfo>>() {
            @Override
            public List<MoiveInfo> apply(BaseMoive baseMoive) throws Exception {
@@ -40,7 +41,7 @@ public class NetVideoPresenter extends BasePresenter<MediaInfoModel, NetVideoCon
                .subscribe(new Observer<List<MoiveInfo>>() {
                    @Override
                    public void onSubscribe(Disposable d) {
-                       d.dispose();
+                       mView.dismissProgress();
                    }
 
                    @Override
@@ -48,17 +49,21 @@ public class NetVideoPresenter extends BasePresenter<MediaInfoModel, NetVideoCon
                        if (value!=null){
 
                            mView.showResult(value);
+                       } else {
+                           mView.showEmpty();
                        }
+                       mView.dismissProgress();
                    }
 
                    @Override
                    public void onError(Throwable e) {
-                    mView.showError();
+                        mView.showError();
+                        mView.dismissProgress();
                    }
 
                    @Override
                    public void onComplete() {
-
+                       mView.dismissProgress();
                    }
                });
     }

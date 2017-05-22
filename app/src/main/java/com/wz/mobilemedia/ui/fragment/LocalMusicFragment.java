@@ -53,16 +53,9 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mAdapter.setOnRecyclerViewItemListener(new MediaInfoAdapter.OnRecyclerViewItemListener() {
             @Override
             public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
-                //Intent intent = new Intent(getActivity(), PlayMusicActivity.class);
-
-               // allBindService();
-
                 Log.e("TAG", "itemClickListener: "+mMusicService.toString() );
               mMusicService.startPlayMusic(mediaInfoBeens.get(position));
-                //intent.putExtra("position",position);
-                //intent.putExtra("musicList",(ArrayList)mediaInfoBeens);
 
-               // startActivity(intent);
             }
         });
     }
