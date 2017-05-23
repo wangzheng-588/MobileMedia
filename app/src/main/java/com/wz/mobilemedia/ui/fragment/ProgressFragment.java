@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,9 +42,7 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
     public ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.e("TAG","onserconn");
             mMusicService = ((MusicService.MusicBind) service).getMusicService();
-            Log.e("TAG", "onServiceConnected: "+mMusicService.toString());
         }
 
         @Override
@@ -98,7 +95,7 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
         mViewContent = (FrameLayout) mRootView.findViewById(R.id.view_content);
         mViewProgress = mRootView.findViewById(R.id.view_progress);
         mViewEmpty = mRootView.findViewById(R.id.view_empty);
-        mTextError = (TextView) mRootView.findViewById(R.id.text_tip);
+        mTextError = (TextView) mRootView.findViewById(R.id.tv_empty);
 
         mContext = getActivity();
 
@@ -171,6 +168,7 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
 
     @Override
     public void showError() {
-        mViewEmpty.setVisibility(View.VISIBLE);
+
     }
+
 }

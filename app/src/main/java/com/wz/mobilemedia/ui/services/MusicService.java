@@ -23,6 +23,7 @@ public class MusicService extends Service{
 
     private ArrayList playMusicList;
     private MediaPlayer mMediaPlayer;
+    boolean isPlaying ;
 
     public class MusicBind extends Binder{
         public MusicService getMusicService(){
@@ -65,10 +66,7 @@ public class MusicService extends Service{
             }
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setDataSource(path);
-
-
             mMediaPlayer.prepareAsync();
-
             mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
@@ -80,6 +78,15 @@ public class MusicService extends Service{
             e.printStackTrace();
         }
 
+    }
+
+    public void startOrPauseMusic(){
+        if (mMediaPlayer.isPlaying()){
+            mMediaPlayer.pause();
+            boolean isPlaying;
+        } else {
+            mMediaPlayer.start();
+        }
     }
 
 

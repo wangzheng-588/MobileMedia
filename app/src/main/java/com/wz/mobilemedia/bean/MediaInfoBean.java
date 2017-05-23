@@ -3,13 +3,24 @@ package com.wz.mobilemedia.bean;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
 
+import org.greenrobot.greendao.annotation.Entity;
+import org.greenrobot.greendao.annotation.Generated;
+import org.greenrobot.greendao.annotation.Id;
+import org.greenrobot.greendao.annotation.Transient;
+
 import java.io.Serializable;
 
 /**
  * Created by wz on 17-5-18.
  */
 
+@Entity
 public class MediaInfoBean implements Serializable {
+
+    private static final long serialVersionUID = 18789823872834L;
+
+    @Id(autoincrement = true)
+    private Long mId;
     private int mType;
     private String mTitle;
     private String mAlbum;
@@ -20,12 +31,33 @@ public class MediaInfoBean implements Serializable {
     private String mDate;
     private String mDisplayName;
     private String mPath;
+    @Transient
     private ImageView mIcon;
-    private long mSize;
+    private Long mSize;
     private String mTile;
+    @Transient
     private transient Bitmap mFrameAtTime;
 
     public MediaInfoBean() {
+    }
+
+    @Generated(hash = 1944517882)
+    public MediaInfoBean(Long mId, int mType, String mTitle, String mAlbum, String mMime, String mArtist,
+            String mDuration, String mBitrate, String mDate, String mDisplayName, String mPath, Long mSize,
+            String mTile) {
+        this.mId = mId;
+        this.mType = mType;
+        this.mTitle = mTitle;
+        this.mAlbum = mAlbum;
+        this.mMime = mMime;
+        this.mArtist = mArtist;
+        this.mDuration = mDuration;
+        this.mBitrate = mBitrate;
+        this.mDate = mDate;
+        this.mDisplayName = mDisplayName;
+        this.mPath = mPath;
+        this.mSize = mSize;
+        this.mTile = mTile;
     }
 
     public int getType() {
@@ -184,5 +216,109 @@ public class MediaInfoBean implements Serializable {
         result = 31 * result + (mTile != null ? mTile.hashCode() : 0);
         result = 31 * result + (mFrameAtTime != null ? mFrameAtTime.hashCode() : 0);
         return result;
+    }
+
+    public Long getMId() {
+        return this.mId;
+    }
+
+    public void setMId(Long mId) {
+        this.mId = mId;
+    }
+
+    public int getMType() {
+        return this.mType;
+    }
+
+    public void setMType(int mType) {
+        this.mType = mType;
+    }
+
+    public String getMTitle() {
+        return this.mTitle;
+    }
+
+    public void setMTitle(String mTitle) {
+        this.mTitle = mTitle;
+    }
+
+    public String getMAlbum() {
+        return this.mAlbum;
+    }
+
+    public void setMAlbum(String mAlbum) {
+        this.mAlbum = mAlbum;
+    }
+
+    public String getMMime() {
+        return this.mMime;
+    }
+
+    public void setMMime(String mMime) {
+        this.mMime = mMime;
+    }
+
+    public String getMArtist() {
+        return this.mArtist;
+    }
+
+    public void setMArtist(String mArtist) {
+        this.mArtist = mArtist;
+    }
+
+    public String getMDuration() {
+        return this.mDuration;
+    }
+
+    public void setMDuration(String mDuration) {
+        this.mDuration = mDuration;
+    }
+
+    public String getMBitrate() {
+        return this.mBitrate;
+    }
+
+    public void setMBitrate(String mBitrate) {
+        this.mBitrate = mBitrate;
+    }
+
+    public String getMDate() {
+        return this.mDate;
+    }
+
+    public void setMDate(String mDate) {
+        this.mDate = mDate;
+    }
+
+    public String getMDisplayName() {
+        return this.mDisplayName;
+    }
+
+    public void setMDisplayName(String mDisplayName) {
+        this.mDisplayName = mDisplayName;
+    }
+
+    public String getMPath() {
+        return this.mPath;
+    }
+
+    public void setMPath(String mPath) {
+        this.mPath = mPath;
+    }
+
+    public Long getMSize() {
+        return this.mSize;
+    }
+
+    public void setMSize(Long mSize) {
+        this.mSize = mSize;
+    }
+
+    public String getMTile() {
+        return this.mTile;
+    }
+
+    public void setMTile(String mTile) {
+        this.mTile = mTile;
     }
 }

@@ -1,7 +1,9 @@
 package com.wz.mobilemedia.ui.fragment;
 
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -19,6 +21,8 @@ public abstract class BaseMediaInfoFragment<T extends RecyclerView.Adapter> exte
     RecyclerView mRecyclerView;
     @BindView(R.id.rl_template_bottom)
     FrameLayout mRlTemplateBottom;
+    @BindView(R.id.swipe_refresh)
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     protected T mAdapter;
     protected MediaPresenter mMediaPresenter;
@@ -30,12 +34,12 @@ public abstract class BaseMediaInfoFragment<T extends RecyclerView.Adapter> exte
     }
 
 
+
     protected void initListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
 
+        });
     }
-
-
-
 
 
     @Override
@@ -56,7 +60,7 @@ public abstract class BaseMediaInfoFragment<T extends RecyclerView.Adapter> exte
 
     @Override
     public void showError() {
-        super.showError();
+        mViewEmpty.setVisibility(View.VISIBLE);
         Toast.makeText(mContext, "数据加载错误，请重新加载", Toast.LENGTH_SHORT).show();
     }
 

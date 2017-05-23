@@ -39,8 +39,10 @@ public class MediaInfoAdapter extends RecyclerView.Adapter<MediaInfoAdapter.View
     }
 
     public void setMediaInfoBeens(List<MediaInfoBean> mediaInfoBeens) {
-        mMediaInfoBeens = mediaInfoBeens;
-        notifyDataSetChanged();
+        if (mediaInfoBeens!=null&&mediaInfoBeens.size()>0){
+            mMediaInfoBeens = mediaInfoBeens;
+            notifyDataSetChanged();
+        }
     }
 
     @Override

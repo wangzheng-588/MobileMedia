@@ -61,4 +61,13 @@ public class NetworkVideoFragment extends  BaseMediaInfoFragment<NetVideoAdapter
     }
 
 
+    @Override
+    public void onRefreshing() {
+
+    }
+
+    @Override
+    public void onRefreshFinish() {
+
+    }
 }

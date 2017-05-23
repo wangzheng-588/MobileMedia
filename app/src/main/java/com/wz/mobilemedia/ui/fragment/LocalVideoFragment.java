@@ -3,6 +3,7 @@ package com.wz.mobilemedia.ui.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
@@ -65,7 +66,7 @@ public class LocalVideoFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
 
     @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
-        if (mediaInfoBeans!=null){
+        if (mediaInfoBeans!=null&&mediaInfoBeans.size()>0){
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
         }
     }
@@ -87,4 +88,13 @@ public class LocalVideoFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
     }
 
 
+    @Override
+    public void onRefreshing() {
+        Toast.makeText(mContext, "下拉成功", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRefreshFinish() {
+
+    }
 }

@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
+apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 25
@@ -16,6 +18,17 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    greendao {
+        schemaVersion 1
+        daoPackage 'com.wz.mobilemedia.dao'
+        targetGenDir 'src/main/java'
     }
 }
 
@@ -59,4 +72,5 @@ dependencies {
     testCompile 'junit:junit:4.12'
     annotationProcessor 'com.google.dagger:dagger-compiler:2.11-rc2'
     compile 'com.facebook.network.connectionclass:connectionclass:1.0.1'
+    compile 'org.greenrobot:greendao:3.2.2'
 }

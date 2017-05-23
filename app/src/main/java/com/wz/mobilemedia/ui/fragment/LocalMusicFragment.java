@@ -2,7 +2,7 @@ package com.wz.mobilemedia.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
@@ -53,8 +53,14 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mAdapter.setOnRecyclerViewItemListener(new MediaInfoAdapter.OnRecyclerViewItemListener() {
             @Override
             public void itemClickListener(int position,List<MediaInfoBean> mediaInfoBeens) {
-                Log.e("TAG", "itemClickListener: "+mMusicService.toString() );
               mMusicService.startPlayMusic(mediaInfoBeens.get(position));
+
+            }
+        });
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
 
             }
         });
@@ -63,20 +69,14 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
 
     @Override
     protected void onFragmentFirstVisible() {
-        super.onFragmentFirstVisible();
+
         mMediaPresenter.requestData(mContext,Contract.MUSIC_TYPE);
     }
-
-    @Override
-    protected void onFragmentVisibleChange(boolean isVisible) {
-
-    }
-
 
 
     @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
-        if (mediaInfoBeans!=null){
+        if (mediaInfoBeans!=null&&mediaInfoBeans.size()>0){
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
         }
     }
@@ -97,4 +97,13 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mViewEmpty.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    public void onRefreshing() {
+
+    }
+
+    @Override
+    public void onRefreshFinish() {
+
+    }
 }

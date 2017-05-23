@@ -63,13 +63,14 @@ public class MediaPresenter extends BasePresenter<MediaInfoModel, MediaInfoContr
              .subscribe(new Consumer<List<MediaInfoBean>>() {
                  @Override
                  public void accept(List<MediaInfoBean> mediaInfoBeen) throws Exception {
-                     if (mediaInfoBeen!=null){
+                     if (mediaInfoBeen!=null&&mediaInfoBeen.size()>0){
                          mView.showResult(mediaInfoBeen);
                      } else {
                          mView.showEmpty();
                      }
 
                      mView.dismissProgress();
+                     mView.onRefreshFinish();
                  }
              });
         } else if (type==MUSIC_TYPE){
@@ -89,17 +90,17 @@ public class MediaPresenter extends BasePresenter<MediaInfoModel, MediaInfoContr
           .subscribe(new Consumer<List<MediaInfoBean>>() {
               @Override
               public void accept(List<MediaInfoBean> mediaInfoBeen) throws Exception {
-                  if (mediaInfoBeen!=null){
+                  if (mediaInfoBeen!=null&&mediaInfoBeen.size()>0){
                       mView.showResult(mediaInfoBeen);
                   } else {
                       mView.showEmpty();
                   }
 
                   mView.dismissProgress();
+                  mView.onRefreshFinish();
               }
           });
         }
-
 
 
     }

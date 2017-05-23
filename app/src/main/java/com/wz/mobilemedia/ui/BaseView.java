@@ -8,4 +8,6 @@ public interface BaseView {
 
 
     void showError();
+    void onRefreshing();
+    void onRefreshFinish();
 }

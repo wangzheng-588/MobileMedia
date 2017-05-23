@@ -149,7 +149,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.et_search:
                 Toast.makeText(this, "search", Toast.LENGTH_SHORT).show();
 
@@ -161,8 +161,31 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
 
             case R.id.ib_history:
                 Toast.makeText(this, "history", Toast.LENGTH_SHORT).show();
+                int currentItem = mViewPager.getCurrentItem();
+                choiceFragment(currentItem);
                 break;
         }
+    }
+
+    private void choiceFragment(int currentItem) {
+        switch (currentItem) {
+            case 0:
+                LocalVideoFragment localVideoFragment = (LocalVideoFragment) mFragments.get(currentItem);
+
+                break;
+            case 1:
+                LocalMusicFragment localMusicFragment = (LocalMusicFragment) mFragments.get(currentItem);
+
+                break;
+            case 2:
+                NetworkMusicFragment networkMusicFragment = (NetworkMusicFragment) mFragments.get(currentItem);
+                break;
+            case 3:
+                NetworkVideoFragment networkVideoFragment = (NetworkVideoFragment) mFragments.get(currentItem);
+                break;
+        }
+
+
     }
 
 }
