@@ -36,7 +36,7 @@ public class MediaPresenter extends BasePresenter<MediaInfoModel, MediaInfoContr
     }
 
     public void requestData(Context context,int type) {
-        mView.showProgress();
+        //mView.showProgress();
         Observable<List<MediaInfoBean>> map=null;
         if (type==VIDEO_TYPE){
              mModel.getLocalVideo(context).map(new Function<List<String>, List<MediaInfoBean>>() {
@@ -96,7 +96,7 @@ public class MediaPresenter extends BasePresenter<MediaInfoModel, MediaInfoContr
                       mView.showEmpty();
                   }
 
-                  mView.dismissProgress();
+                  //mView.dismissProgress();
                   mView.onRefreshFinish();
               }
           });

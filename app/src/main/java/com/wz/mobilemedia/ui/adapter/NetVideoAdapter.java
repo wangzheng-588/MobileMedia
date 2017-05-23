@@ -2,7 +2,7 @@ package com.wz.mobilemedia.ui.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,10 +12,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.wz.mobilemedia.R;
+import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.bean.MoiveInfo;
 import com.wz.mobilemedia.ui.activity.PlayVideoActivity;
 import com.wz.mobilemedia.util.TimeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -69,7 +71,20 @@ public class NetVideoAdapter extends RecyclerView.Adapter<NetVideoAdapter.ViewHo
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(mContext, PlayVideoActivity.class);
-                intent.setDataAndType(Uri.parse(moive.getUrl()),"video/*");
+                //intent.setDataAndType(Uri.parse(moive.getUrl()),"video/*");
+                List<MediaInfoBean> mediaInfoBeen = new ArrayList<MediaInfoBean>();
+                MediaInfoBean mediaInfoBean;
+                for (int i = 0; i < mMoiveInfoBeens.size(); i++) {
+                    mediaInfoBean = new MediaInfoBean();
+                    mediaInfoBean.setPath(mMoiveInfoBeens.get(i).getUrl());
+                    mediaInfoBean.setTile(mMoiveInfoBeens.get(i).getMovieName());
+                    mediaInfoBeen.add(mediaInfoBean);
+                }
+
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("videoList",(ArrayList<MediaInfoBean>)mediaInfoBeen);
+                bundle.putInt("position",position);
+                intent.putExtras(bundle);
                 mContext.startActivity(intent);
             }
         });

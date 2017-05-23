@@ -274,6 +274,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
     private void getData() {
         mUri = getIntent().getData();
         mVideoPlays = (ArrayList<MediaInfoBean>) (getIntent().getSerializableExtra("videoList"));
+
         mPosition = getIntent().getIntExtra("position", 0);
     }
 
@@ -338,7 +339,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
 
         if (mVideoPlays != null && mVideoPlays.size() > 0) {
             mVideoView.setVideoPath(mVideoPlays.get(position).getPath());
-            mTvFilename.setText(mVideoPlays.get(position).getTile());
+//            mTvFilename.setText(mVideoPlays.get(position).getTile());
             mIsNetUri = NetUtils.isNetUri(mVideoPlays.get(position).getPath());
 
         } else if (mUri != null) {
@@ -359,6 +360,7 @@ public class PlayVideoActivity extends BaseActivity implements MediaPlayer.OnErr
                 mHandler.sendEmptyMessage(CURRENT_POSITION);
                 mVideoHeight = mp.getVideoHeight();
                 mVideoWidth = mp.getVideoWidth();
+                mTvFilename.setText(mVideoPlays.get(mPosition).getTile());
                 mp.start();
             }
         });

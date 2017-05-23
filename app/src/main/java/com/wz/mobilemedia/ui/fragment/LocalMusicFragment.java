@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
+import com.wz.mobilemedia.dao.MediaInfoBeanDao;
 import com.wz.mobilemedia.data.MediaInfoModel;
 import com.wz.mobilemedia.presenter.MediaPresenter;
 import com.wz.mobilemedia.presenter.contract.MediaInfoContract;
@@ -26,7 +27,7 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
         mMediaPresenter = new MediaPresenter(mediaInfoModel, this);
 
-        List<MediaInfoBean> mediaInfoBeen = mMediaInfoBeanDao.loadAll();
+        List<MediaInfoBean> mediaInfoBeen = mMediaInfoBeanDao.queryBuilder().where(MediaInfoBeanDao.Properties.MType.eq(Contract.MUSIC_TYPE)).list();
         if (mediaInfoBeen.size()==0){
             mViewEmpty.setVisibility(View.VISIBLE);
         } else {
@@ -75,6 +76,12 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
     @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
         if (mediaInfoBeans!=null&&mediaInfoBeans.size()>0){
+
+            List<MediaInfoBean> mediaInfoBeen = mMediaInfoBeanDao.queryBuilder().where(MediaInfoBeanDao.Properties.MType.eq(Contract.MUSIC_TYPE)).list();
+            mMediaInfoBeanDao.deleteInTx(mediaInfoBeen);
+
+            mMediaInfoBeanDao.insertInTx(mediaInfoBeans);
+
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
             mViewEmpty.setVisibility(View.GONE);
         }
