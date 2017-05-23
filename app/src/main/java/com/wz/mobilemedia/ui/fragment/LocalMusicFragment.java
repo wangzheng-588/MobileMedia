@@ -21,18 +21,23 @@ import java.util.List;
 public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> implements MediaInfoContract.View{
 
 
-
     @Override
     protected void init() {
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
         mMediaPresenter = new MediaPresenter(mediaInfoModel, this);
+
+        List<MediaInfoBean> mediaInfoBeen = mMediaInfoBeanDao.loadAll();
+        if (mediaInfoBeen.size()==0){
+            mViewEmpty.setVisibility(View.VISIBLE);
+        } else {
+            mAdapter.setMediaInfoBeens(mediaInfoBeen);
+        }
     }
 
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         allBindService();
     }
 
@@ -61,16 +66,9 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
+                mMediaPresenter.requestData(mContext,Contract.MUSIC_TYPE);
             }
         });
-    }
-
-
-    @Override
-    protected void onFragmentFirstVisible() {
-
-        mMediaPresenter.requestData(mContext,Contract.MUSIC_TYPE);
     }
 
 
@@ -78,6 +76,7 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
         if (mediaInfoBeans!=null&&mediaInfoBeans.size()>0){
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
+            mViewEmpty.setVisibility(View.GONE);
         }
     }
 
@@ -97,13 +96,9 @@ public class LocalMusicFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mViewEmpty.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    public void onRefreshing() {
-
-    }
 
     @Override
     public void onRefreshFinish() {
-
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 }

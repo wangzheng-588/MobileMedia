@@ -2,8 +2,8 @@ package com.wz.mobilemedia.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
-import android.widget.Toast;
 
 import com.wz.mobilemedia.bean.MediaInfoBean;
 import com.wz.mobilemedia.common.Contract;
@@ -45,13 +45,20 @@ public class LocalVideoFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
                 Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
                 //跳转到vitamio播放器
                 //Intent intent = new Intent(getActivity(), VitamioPlayActivity.class);
-
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("videoList",(ArrayList<MediaInfoBean>)mediaInfoBeens);
                 bundle.putInt("position",position);
                 intent.putExtras(bundle);
                 //intent.putExtra("mediaPath",mediaInfoBeens.get(position).getPath());
                 startActivity(intent);
+            }
+        });
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                mMediaPresenter.requestData(mContext, Contract.VIDEO_TYPE);
+
             }
         });
     }
@@ -61,16 +68,23 @@ public class LocalVideoFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
     protected void init() {
         MediaInfoModel mediaInfoModel = new MediaInfoModel();
         mMediaPresenter = new MediaPresenter(mediaInfoModel, this);
-        mMediaPresenter.requestData(mContext, Contract.VIDEO_TYPE);
+
+        List<MediaInfoBean> mediaInfoBeen = mMediaInfoBeanDao.loadAll();
+        if (mediaInfoBeen.size()==0){
+            mViewEmpty.setVisibility(View.VISIBLE);
+        } else {
+            mAdapter.setMediaInfoBeens(mediaInfoBeen);
+        }
+
     }
 
     @Override
     public void showResult(List<MediaInfoBean> mediaInfoBeans) {
         if (mediaInfoBeans!=null&&mediaInfoBeans.size()>0){
             mAdapter.setMediaInfoBeens(mediaInfoBeans);
+            mViewEmpty.setVisibility(View.GONE);
         }
     }
-
 
     @Override
     public void showProgress() {
@@ -87,14 +101,8 @@ public class LocalVideoFragment extends BaseMediaInfoFragment<MediaInfoAdapter> 
         mViewEmpty.setVisibility(View.VISIBLE);
     }
 
-
-    @Override
-    public void onRefreshing() {
-        Toast.makeText(mContext, "下拉成功", Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void onRefreshFinish() {
-
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 }

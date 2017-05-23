@@ -15,6 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.wz.mobilemedia.R;
+import com.wz.mobilemedia.dao.MediaInfoBeanDao;
+import com.wz.mobilemedia.dao.manager.DaoManager;
 import com.wz.mobilemedia.ui.BaseView;
 import com.wz.mobilemedia.ui.services.MusicService;
 
@@ -38,6 +40,7 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
     private Unbinder mBind;
     protected Context mContext;
     protected MusicService mMusicService;
+    protected MediaInfoBeanDao mMediaInfoBeanDao;
 
     public ServiceConnection mConnection = new ServiceConnection() {
         @Override
@@ -50,6 +53,7 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
 
         }
     };
+
 
 
     @Override
@@ -86,6 +90,8 @@ public abstract class ProgressFragment extends Fragment implements BaseView {
 
         mContext = getActivity();
         initVariable();
+
+        mMediaInfoBeanDao = DaoManager.getInstance().getSession().getMediaInfoBeanDao();
     }
 
     @Nullable
